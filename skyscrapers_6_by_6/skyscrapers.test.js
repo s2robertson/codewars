@@ -1,6 +1,7 @@
 const { 
     solvePuzzle,
-    createInitialState
+    createInitialState,
+    applyValues
 } = require('./skyscrapers');
 
 describe('Initial state generation', () => {
@@ -299,6 +300,155 @@ describe('Initial state generation', () => {
                 expect(state.squares[i][j].values).toBeSetMatching(testSetValues[j]);
             }
         }
+    })
+})
+
+describe('applyValues tests', () => {
+    test('Applying a value in all rows/columns except one should infer the missing one', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 1,
+                col: 1,
+                value: 1
+            }, {
+                row: 2,
+                col: 2,
+                value: 1
+            }, {
+                row: 3,
+                col: 3,
+                value: 1
+            }, {
+                row: 4,
+                col: 4,
+                value: 1
+            }
+        ]);
+
+        expect(state.squares[5][5].value).toBe(1);
+    })
+
+    test('Applying all values except one in a row should infer the missing one', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 0,
+                col: 1,
+                value: 2
+            }, {
+                row: 0,
+                col: 2,
+                value: 3
+            }, {
+                row: 0,
+                col: 3,
+                value: 4
+            }, {
+                row: 0,
+                col: 4,
+                value: 5
+            }
+        ]);
+
+        expect(state.squares[0][5].value).toBe(6);
+    })
+
+    test('Applying all values except one in a column should infer the missing one', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 6
+            }, {
+                row: 1,
+                col: 0,
+                value: 1
+            }, {
+                row: 2,
+                col: 0,
+                value: 5
+            }, {
+                row: 3,
+                col: 0,
+                value: 2
+            }, {
+                row: 4,
+                col: 0,
+                value: 4
+            }
+        ]);
+
+        expect(state.squares[5][0].value).toBe(3);
+    })
+
+    test('Applying four values in a row and a fifth value in one of the empty columns should complete the row', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 0,
+                col: 1,
+                value: 2
+            }, {
+                row: 0,
+                col: 4,
+                value: 5
+            }, {
+                row: 0,
+                col: 5,
+                value: 6
+            }, {
+                row: 1,
+                col: 2,
+                value: 4
+            }
+        ]);
+
+        expect(state.squares[0][2].value).toBe(3);
+        expect(state.squares[0][3].value).toBe(4);
+    })
+
+    test('Applying four values in a column and a fifth value in one of the empty rows should complete the column', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 1,
+                col: 0,
+                value: 2
+            }, {
+                row: 4,
+                col: 0,
+                value: 5
+            }, {
+                row: 5,
+                col: 0,
+                value: 6
+            }, {
+                row: 2,
+                col: 1,
+                value: 4
+            }
+        ]);
+
+        expect(state.squares[2][0].value).toBe(3);
+        expect(state.squares[3][0].value).toBe(4);
     })
 })
 

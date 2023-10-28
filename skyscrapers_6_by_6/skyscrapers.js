@@ -216,5 +216,6 @@ function applyValues(state, valuesToSet) {
 
 module.exports = {
     solvePuzzle,
-    createInitialState
+    createInitialState,
+    applyValues
 };
