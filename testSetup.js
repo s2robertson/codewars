@@ -22,11 +22,15 @@ expect.extend({
             }
         }
         return pass ? {
-            message: () => `expected ${actual} not to be a Set matching ${expected}`,
+            message: () => `expected ${stringifySet(actual)} not to be a Set matching ${stringifySet(expected)}`,
             pass: true
         } : {
-            message: () => `expected ${actual} to be a Set matching ${expected}`,
+            message: () => `expected ${stringifySet(actual)} to be a Set matching ${stringifySet(expected)}`,
             pass: false
         };
     }
 })
+
+function stringifySet(s) {
+    return `Set(${s.size})[${Array.from(s)}]`;
+}
