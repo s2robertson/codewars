@@ -1,7 +1,8 @@
 const { 
     solvePuzzle,
     createInitialState,
-    applyValues
+    applyValues,
+    findLineWithMRV
 } = require('./skyscrapers');
 
 describe('Initial state generation', () => {
@@ -449,6 +450,127 @@ describe('applyValues tests', () => {
 
         expect(state.squares[2][0].value).toBe(3);
         expect(state.squares[3][0].value).toBe(4);
+    })
+})
+
+describe('Min Remaining Values tests', () => {
+    test('Select row with fewest remaining values', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 1,
+                col: 0,
+                value: 1
+            }, {
+                row: 1,
+                col: 1,
+                value: 2
+            }, {
+                row: 1,
+                col: 2,
+                value: 3
+            }, {
+                row: 2,
+                col: 0,
+                value: 2
+            }, {
+                row: 2,
+                col: 1,
+                value: 3
+            }
+        ]);
+        expect(findLineWithMRV(state)).toEqual({ type: 'row', index: 1 });
+    })
+
+    test('Select column with fewest remaining values', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 1,
+                col: 0,
+                value: 2
+            }, {
+                row: 2,
+                col: 0,
+                value: 3
+            }, {
+                row: 0,
+                col: 1,
+                value: 2
+            }, {
+                row: 1,
+                col: 1,
+                value: 3
+            }
+        ]);
+        expect(findLineWithMRV(state)).toEqual({ type: 'col', index: 0 })
+    })
+
+    test('Select column with one fewer possible value', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 1,
+                col: 0,
+                value: 2
+            }, {
+                row: 2,
+                col: 0,
+                value: 3
+            }, {
+                row: 0,
+                col: 1,
+                value: 6
+            }, {
+                row: 1,
+                col: 1,
+                value: 5
+            }, {
+                row: 2,
+                col: 1,
+                value: 4
+            }, {
+                row: 3,
+                col: 2,
+                value: 5
+            }
+        ]);
+        expect(findLineWithMRV(state)).toEqual({ type: 'col', index: 0 });
+    })
+
+    test('Select column with a clue attached', () => {
+        const clues = new Array(24);
+        clues.fill(0);
+        clues[17] = 3;
+        const state = createInitialState(clues);
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 1,
+                col: 0,
+                value: 2
+            }, {
+                row: 0,
+                col: 1,
+                value: 6
+            }, {
+                row: 1,
+                col: 1,
+                value: 5
+            }
+        ]);
+        expect(findLineWithMRV(state)).toEqual({ type: 'col', index: 0 });
     })
 })
 

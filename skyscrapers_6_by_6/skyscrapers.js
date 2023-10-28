@@ -112,6 +112,13 @@ function createInitialState(clues) {
             }
         }
         applyValues(state, valuesToSet);
+    } else {
+        for (let i = 0; i < 6; i++) {
+            state.rows[i].left = 0;
+            state.rows[i].right = 0;
+            state.cols[i].top = 0;
+            state.cols[i].bottom = 0;
+        }
     }
     return state;
 }
@@ -214,8 +221,46 @@ function applyValues(state, valuesToSet) {
     }
 }
 
+function findLineWithMRV(state) {
+    let res = {
+        type: null,
+        index: null,
+    };
+    let resCount = 0;
+    for (let i = 0; i < 6; i++) {
+        let rowCount = 0;
+        let colCount = 0;
+        for (let j = 0; j < 6; j++) {
+            if (!state.squares[i][j].value) {
+                rowCount += state.squares[i][j].values.size;
+            }
+            if (!state.squares[j][i].value) {
+                colCount += state.squares[j][i].values.size;
+            }
+        }
+        const rowCountWithClues = rowCount - state.rows[i].left - state.rows[i].right;
+        if (rowCount && (!res.type || rowCountWithClues < resCount)) {
+            res = {
+                type: 'row',
+                index: i
+            };
+            resCount = rowCountWithClues;
+        }
+        const colCountWithClues = colCount - state.cols[i].top - state.cols[i].bottom;
+        if (colCount && (!res.type || colCountWithClues < resCount)) {
+            res = {
+                type: 'col',
+                index: i
+            };
+            resCount = colCountWithClues;
+        }
+    }
+    return res;
+}
+
 module.exports = {
     solvePuzzle,
     createInitialState,
-    applyValues
+    applyValues,
+    findLineWithMRV
 };
