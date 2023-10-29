@@ -258,9 +258,103 @@ function findLineWithMRV(state) {
     return res;
 }
 
+function generatePossibleSuccessors(state, { type, index: i }) {
+    const squareValues = {
+        1: true, 2: true, 3: true, 4: true, 5: true, 6: true
+    };
+    // remove already set square values
+    for (let j = 0; j < 6; j++) {
+        const square = type === 'row' ? state.squares[i][j] : state.squares[j][i];
+        if (square.value) {
+            squareValues[square.value] = false;
+        }
+    }
+    return generateRecursively([], 0);
+
+    function generateRecursively(partial, j) {
+        const res = [];
+        if (j >= 6) {
+            const [fromStart, fromEnd] = getClues();
+            if (testClues(partial, fromStart, fromEnd)) {
+                res.push(partial.map(valueToInstruction));
+            }
+        } else {
+            const square = type === 'row' ? state.squares[i][j] : state.squares[j][i];
+            if (square.value) {
+                partial.push(square.value);
+                res.push(...generateRecursively(partial, j + 1));
+            } else {
+                for (const val of square.values) {
+                    if (squareValues[val]) {
+                        squareValues[val] = false;
+                        const newPartial = partial.concat(val);
+                        res.push(...generateRecursively(newPartial, j + 1));
+                        squareValues[val] = true;
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
+    function getClues() {
+        if (type === 'row') {
+            return [state.rows[i].left, state.rows[i].right];
+        } else {
+            return [state.cols[i].top, state.cols[i].bottom];
+        }
+    }
+
+    function valueToInstruction(value, j) {
+        return type === 'row' ? {
+            row: i,
+            col: j,
+            value
+        } : {
+            row: j,
+            col: i,
+            value
+        };
+    }
+}
+
+function testClues(values, fromStart, fromEnd) {
+    if (fromStart !== 0) {
+        let greatestHeight = 0;
+        let numVisible = 0;
+        for (let i = 0; i < 6; i++) {
+            if (values[i] > greatestHeight) {
+                greatestHeight = values[i];
+                numVisible++;
+            }
+        }
+        if (numVisible !== fromStart) {
+            return false;
+        }
+    }
+
+    if (fromEnd !== 0) {
+        let greatestHeight = 0;
+        let numVisible = 0;
+        for (let i = 5; i >= 0; i--) {
+            if (values[i] > greatestHeight) {
+                greatestHeight = values[i];
+                numVisible++;
+            }
+        }
+        if (numVisible !== fromEnd) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 module.exports = {
     solvePuzzle,
     createInitialState,
     applyValues,
-    findLineWithMRV
+    findLineWithMRV,
+    generatePossibleSuccessors,
+    testClues
 };

@@ -2,7 +2,9 @@ const {
     solvePuzzle,
     createInitialState,
     applyValues,
-    findLineWithMRV
+    findLineWithMRV,
+    generatePossibleSuccessors,
+    testClues
 } = require('./skyscrapers');
 
 describe('Initial state generation', () => {
@@ -571,6 +573,300 @@ describe('Min Remaining Values tests', () => {
             }
         ]);
         expect(findLineWithMRV(state)).toEqual({ type: 'col', index: 0 });
+    })
+})
+
+describe('testClues', () => {
+    test('Matches 6 visible', () => {
+        expect(testClues([1, 2, 3, 4, 5, 6], 6, 0)).toBeTrue();
+        expect(testClues([6, 5, 4, 3, 2, 1], 0, 6)).toBeTrue();
+    })
+
+    test('Matches 1 visible', () => {
+        expect(testClues([6, 1, 2, 3, 4, 5], 1, 0)).toBeTrue();
+        expect(testClues([6, 5, 4, 3, 2, 1], 1, 0)).toBeTrue();
+        expect(testClues([6, 3, 4, 1, 5, 2], 1, 0)).toBeTrue();
+        expect(testClues([5, 4, 3, 2, 1, 6], 0, 1)).toBeTrue();
+        expect(testClues([1, 2, 3, 4, 5, 6], 0, 1)).toBeTrue();
+        expect(testClues([2, 5, 1, 4, 3, 6], 0, 1)).toBeTrue();
+    })
+
+    test('Matches 3 visible', () => {
+        expect(testClues([2, 4, 3, 1, 6, 5], 3, 0)).toBeTrue();
+        expect(testClues([4, 3, 5, 2, 6, 1], 3, 0)).toBeTrue();
+        expect(testClues([3, 2, 1, 5, 4, 6], 3, 0)).toBeTrue();
+        expect(testClues([5, 6, 1, 3, 4, 2], 0, 3)).toBeTrue();
+        expect(testClues([1, 6, 2, 5, 3, 4], 0, 3)).toBeTrue();
+        expect(testClues([6, 4, 5, 1, 2, 3], 0, 3)).toBeTrue();
+    })
+
+    test('Doesn\'t match 1 visible', () => {
+        expect(testClues([5, 6, 1, 2, 3, 4], 1, 0)).toBeFalse();
+        expect(testClues([4, 3, 2, 1, 6, 5], 0, 1)).toBeFalse();
+    })
+
+    test('Doesn\'t match 6 visible', () => {
+        expect(testClues([1, 2, 3, 4, 6, 5], 6, 0)).toBeFalse();
+        expect(testClues([5, 6, 4, 3, 2, 1], 0, 6)).toBeFalse();
+    })
+
+    test('Matches conditions from both start and end', () => {
+        expect(testClues([1, 2, 3, 4, 5, 6], 6, 1)).toBeTrue();
+        expect(testClues([5, 1, 2, 6, 3, 4], 2, 2)).toBeTrue();
+        expect(testClues([1, 3, 5, 6, 4, 2], 4, 3)).toBeTrue();
+        expect(testClues([1, 2, 4, 3, 5, 6], 5, 1)).toBeTrue();
+    })
+
+    test('Matches one condition, but not both', () => {
+        expect(testClues([1, 2, 3, 4, 6, 5], 5, 1)).toBeFalse();
+        expect(testClues([5, 3, 2, 6, 5, 1], 2, 2)).toBeFalse();
+        expect(testClues([1, 3, 6, 4, 2, 5], 2, 2)).toBeFalse();
+    })
+})
+
+describe('generatePossibleSuccesors tests', () => {
+    test('Fills in a row', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 0,
+                col: 1,
+                value: 2
+            }, {
+                row: 0,
+                col: 2,
+                value: 3
+            }
+        ]);
+
+        const successors = generatePossibleSuccessors(state, { type: 'row', index: 0 });
+        expect(successors).toHaveLength(6);
+        const base = [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 0,
+                col: 1,
+                value: 2
+            }, {
+                row: 0,
+                col: 2,
+                value: 3
+            }
+        ];
+        expect(successors).toContainEqual([
+            ...base, {
+                row: 0,
+                col: 3,
+                value: 4
+            }, {
+                row: 0,
+                col: 4,
+                value: 5
+            }, {
+                row: 0,
+                col: 5,
+                value: 6
+            }
+        ]);
+        expect(successors).toContainEqual([
+            ...base, {
+                row: 0,
+                col: 3,
+                value: 4
+            }, {
+                row: 0,
+                col: 4,
+                value: 6
+            }, {
+                row: 0,
+                col: 5,
+                value: 5
+            }
+        ]);
+        expect(successors).toContainEqual([
+            ...base, {
+                row: 0,
+                col: 3,
+                value: 5
+            }, {
+                row: 0,
+                col: 4,
+                value: 4
+            }, {
+                row: 0,
+                col: 5,
+                value: 6
+            }
+        ]);
+        expect(successors).toContainEqual([
+            ...base, {
+                row: 0,
+                col: 3,
+                value: 5
+            }, {
+                row: 0,
+                col: 4,
+                value: 6
+            }, {
+                row: 0,
+                col: 5,
+                value: 4
+            }
+        ]);
+        expect(successors).toContainEqual([
+            ...base, {
+                row: 0,
+                col: 3,
+                value: 6
+            }, {
+                row: 0,
+                col: 4,
+                value: 4
+            }, {
+                row: 0,
+                col: 5,
+                value: 5
+            }
+        ]);
+        expect(successors).toContainEqual([
+            ...base, {
+                row: 0,
+                col: 3,
+                value: 6
+            }, {
+                row: 0,
+                col: 4,
+                value: 5
+            }, {
+                row: 0,
+                col: 5,
+                value: 4
+            }
+        ])
+    })
+
+    test('Fills in a column', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 0,
+                col: 0,
+                value: 1
+            }, {
+                row: 2,
+                col: 0,
+                value: 2
+            }, {
+                row: 4,
+                col: 0,
+                value: 4
+            }
+        ]);
+
+        const successors = generatePossibleSuccessors(state, { type: 'col', index: 0 });
+        expect(successors).toHaveLength(6);
+        const allExpected = [
+            [1, 3, 2, 5, 4, 6],
+            [1, 3, 2, 6, 4, 5],
+            [1, 5, 2, 3, 4, 6],
+            [1, 5, 2, 6, 4, 3],
+            [1, 6, 2, 3, 4, 5],
+            [1, 6, 2, 5, 4, 3]
+        ].map(arr => arr.map((value, row) => ({
+            col: 0,
+            row,
+            value
+        })));
+        for (const expected of allExpected) {
+            expect(successors).toContainEqual(expected);
+        }
+    })
+
+    test('Row with fewer options', () => {
+        const state = createInitialState();
+        applyValues(state, [
+            {
+                row: 1,
+                col: 0,
+                value: 6
+            }, {
+                row: 1,
+                col: 1,
+                value: 5
+            }, {
+                row: 1,
+                col: 2,
+                value: 4
+            }, {
+                row: 0,
+                col: 4,
+                value: 1
+            }
+        ]);
+
+        const successors = generatePossibleSuccessors(state, { type: 'row', index: 1 });
+        expect(successors).toHaveLength(4)
+        const allExpected = [
+            [6, 5, 4, 3, 2, 1],
+            [6, 5, 4, 2, 3, 1],
+            [6, 5, 4, 1, 2, 3],
+            [6, 5, 4, 1, 3, 2]
+        ].map(arr => arr.map((value, col) => ({
+            row: 1,
+            col,
+            value
+        })));
+        for (const expected of allExpected) {
+            expect(successors).toContainEqual(expected);
+        }
+    })
+
+    test('Row with clues restricting it', () => {
+        const clues = new Array(24);
+        clues.fill(0);
+        clues[7] = 4;
+        const state = createInitialState(clues);
+        applyValues(state, [
+            {
+                row: 1,
+                col: 5,
+                value: 1
+            }, {
+                row: 1,
+                col: 4,
+                value: 2
+            }
+        ]);
+
+        const successors = generatePossibleSuccessors(state, { type: 'row', index: 1 });
+        expect(successors).toHaveLength(11);
+        const allExpected = [
+            [4, 5, 6, 3, 2, 1],
+            [5, 4, 6, 3, 2, 1],
+            [5, 3, 6, 4, 2, 1],
+            [3, 5, 6, 4, 2, 1],
+            [5, 6, 3, 4, 2, 1],
+            [4, 3, 6, 5, 2, 1],
+            [3, 4, 6, 5, 2, 1],
+            [4, 6, 3, 5, 2, 1],
+            [3, 6, 4, 5, 2, 1],
+            [6, 4, 3, 5, 2, 1],
+            [6, 3, 4, 5, 2, 1]
+        ].map(arr => arr.map((value, col) => ({
+            row: 1,
+            col,
+            value
+        })));
+        for (const expected of allExpected) {
+            expect(successors).toContainEqual(expected);
+        }
     })
 })
 
