@@ -5,9 +5,29 @@
 // their arrangement (taller skyscrapers can be seen behind shorter ones, but not the reverse).
 // The 'clues' argument has restrictions on how many skyscrapers should be visible from the top/bottom of a column,
 // or left/right of a row, or 0 for no restriction.
+// This solution is probably massive overkill, but I wanted to explore how I might solve a more complicated
+// constraint satisfaction problem.
 function solvePuzzle(clues) {
     const state = createInitialState(clues);
+    solveRecursively();
     return state.squares.map(row => row.map(square => square.value));
+
+    function solveRecursively() {
+        const line = findLineWithMRV(state);
+        if (!line) return true; // no more empty squares!
+
+        const successorUpdates = generatePossibleSuccessors(state, line);
+        for (const update of successorUpdates) {
+            const { undoStack, error } = applyValues(state, update);
+            if (!error) {
+                if (solveRecursively()) {
+                    return true;
+                }
+            }
+            undoStack.forEach(func => func());
+        }
+        return false;
+    }
 }
 
 function createInitialState(clues) {
@@ -136,6 +156,10 @@ function applyValues(state, valuesToSet) {
 
             state.squares[params.row][params.col].value = params.value;
             undoStack.push(() => { state.squares[params.row][params.col].value = null });
+            if (!testRowClues(params.row) || !testColClues(params.col)) {
+                throw new Error(`Clue violation`);
+            }
+
             for (let i = 0; i < 6; i++) {
                 if (i !== params.col) {
                     // remove 'params.value' as a possible value for all other squares in row 'params.row'
@@ -219,13 +243,34 @@ function applyValues(state, valuesToSet) {
             }
         }
     }
+
+    function testRowClues(row) {
+        const line = new Array(6);
+        for (let i = 0; i < 6; i++) {
+            line[i] = state.squares[row][i].value;
+            if (!line[i]) {
+                // wait until the line is full
+                return true;
+            }
+        }
+        return testClues(line, state.rows[row].left, state.rows[row].right);
+    }
+
+    function testColClues(col) {
+        const line = new Array(6);
+        for (let i = 0; i < 6; i++) {
+            line[i] = state.squares[i][col].value;
+            if (!line[i]) {
+                // wait until the line is full
+                return true;
+            }
+        }
+        return testClues(line, state.cols[col].top, state.cols[col].bottom);
+    }
 }
 
 function findLineWithMRV(state) {
-    let res = {
-        type: null,
-        index: null,
-    };
+    let res = null;
     let resCount = 0;
     for (let i = 0; i < 6; i++) {
         let rowCount = 0;
@@ -239,7 +284,7 @@ function findLineWithMRV(state) {
             }
         }
         const rowCountWithClues = rowCount - state.rows[i].left - state.rows[i].right;
-        if (rowCount && (!res.type || rowCountWithClues < resCount)) {
+        if (rowCount && (!res || rowCountWithClues < resCount)) {
             res = {
                 type: 'row',
                 index: i
@@ -247,7 +292,7 @@ function findLineWithMRV(state) {
             resCount = rowCountWithClues;
         }
         const colCountWithClues = colCount - state.cols[i].top - state.cols[i].bottom;
-        if (colCount && (!res.type || colCountWithClues < resCount)) {
+        if (colCount && (!res || colCountWithClues < resCount)) {
             res = {
                 type: 'col',
                 index: i

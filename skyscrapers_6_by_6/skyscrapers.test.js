@@ -871,7 +871,7 @@ describe('generatePossibleSuccesors tests', () => {
 })
 
 describe('Provided tests', () => {
-    test.failing('Puzzle 1', () => {
+    test('Puzzle 1', () => {
         const clues =  [3, 2, 2, 3, 2, 1, 1, 2, 3, 3, 2, 2, 5, 1, 2, 2, 4, 3, 3, 2, 1, 2, 2, 4];
         const expected = [
             [ 2, 1, 4, 3, 5, 6],
@@ -884,7 +884,7 @@ describe('Provided tests', () => {
         expect(solvePuzzle(clues)).toEqual(expected);
     })
 
-    test.failing('Puzzle 2', () => {
+    test('Puzzle 2', () => {
         const clues = [0, 0, 0, 2, 2, 0, 0, 0, 0, 6, 3, 0, 0, 4, 0, 0, 0, 0, 4, 4, 0, 3, 0, 0];
         const expected = [
             [ 5, 6, 1, 4, 3, 2 ], 
@@ -897,7 +897,7 @@ describe('Provided tests', () => {
         expect(solvePuzzle(clues)).toEqual(expected);
     })
 
-    test.failing('Puzzle 3', () => {
+    test('Puzzle 3', () => {
         const clues = [0, 3, 0, 5, 3, 4, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 2, 3, 3, 2, 0, 3, 1, 0];
         const expected = [
             [ 5, 2, 6, 1, 4, 3 ], 
