@@ -1,4 +1,5 @@
 // https://www.codewars.com/kata/53005a7b26d12be55c000243/javascript
+// Extended: https://www.codewars.com/kata/52ffcfa4aff455b3c2000750/javascript
 
 class NumberValue {
     constructor(value) {
@@ -85,8 +86,8 @@ class Interpreter {
     }
 
     static tokenize(program) {
-        const regex = /\s*([-+*\/\%=\(\)]|[A-Za-z_][A-Za-z0-9_]*|[0-9]*\.?[0-9]+)\s*/g;
-        return program.split(regex).filter(s => /\S/.test(s));
+        const regex = /(?:[-+*\/\%=\(\)]|[A-Za-z_][A-Za-z0-9_]*|[0-9]*\.?[0-9]+)/g;
+        return program.match(regex);
     }
 
     static identifierRE = /^[A-Za-z_][A-Za-z0-9_]*$/
