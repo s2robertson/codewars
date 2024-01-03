@@ -3,7 +3,7 @@
 
 class NumberValue {
     constructor(value) {
-        this.value = value;
+        this.value = typeof value === 'number' ? value : parseFloat(value);
     }
 
     eval() {
@@ -70,16 +70,6 @@ class Assignment extends Operator {
     }
 }
 
-class BracketExpression {
-    constructor(subtree) {
-        this.subtree = subtree;
-    }
-
-    eval(vars) {
-        return this.subtree.eval(vars);
-    }
-}
-
 class Interpreter {
     constructor() {
         this.vars = new Map();
@@ -96,73 +86,78 @@ class Interpreter {
     }
 
     static numberRE = /^[0-9]*\.?[0-9]+$/
+    static isNumber(token) {
+        return this.numberRE.test(token);
+    }
 
     input(expr) {
         const tokens = Interpreter.tokenize(expr);
         if (tokens.length === 0) return '';
-        const expressionTree = Interpreter.parseTokens(tokens);
+        const expressionTree = this.parseTokens(tokens);
         return expressionTree.eval(this.vars);
     }
 
-    static parseTokens(tokens, start = 0, end = tokens.length) {
-        const classes = {
-            '+': Addition,
-            '-': Subtraction,
-            '*': Multiplication,
-            '/': Division,
-            '%': Modulus
-        }
-        let treeRoot = null;
+    parseTokens(tokens, start = 0, end = tokens.length) {
+        // first pass: assignments and bracket expressions
+        const phase1 = [];
         for (let i = start; i < end; i++) {
             const token = tokens[i];
-            let nextToken;
-            let Op;
-            switch (token) {
-                case '+':
-                case '-':
-                    Op = classes[token];
-                    [nextToken, i] = parseFactor(i + 1);
-                    treeRoot = new Op(treeRoot, nextToken);
-                    break;
-                case '*':
-                case '/':
-                case '%':
-                    Op = classes[token];
-                    [nextToken, i] = parseFactor(i + 1);
-                    if (treeRoot instanceof Addition || treeRoot instanceof Subtraction) {
-                        treeRoot.right = new Op(treeRoot.right, nextToken);
-                    } else {
-                        treeRoot = new Op(treeRoot, nextToken);
-                    }
-                    break;
-                case '=':
-                    const rightSubtree = this.parseTokens(tokens, i + 1, end);
-                    if (treeRoot instanceof Operator) {
-                        treeRoot.right = new Assignment(treeRoot.right, rightSubtree);
-                    } else {
-                        treeRoot = new Assignment(treeRoot, rightSubtree);
-                    }
-                    return treeRoot;
-                default:
-                    [treeRoot, i] = parseFactor(i);
-                    treeRoot = new Addition(new NumberValue(0), treeRoot);
-                    break;
+            if (token === '(') {
+                const newEnd = findClosingBracket(i);
+                phase1.push(this.parseTokens(tokens, i + 1, newEnd));
+                i = newEnd;
+            } else if (token === '=') {
+                const identifier = phase1.pop();
+                const rightSubtree = this.parseTokens(tokens, i + 1, end);
+                phase1.push(new Assignment(identifier, rightSubtree));
+                break;
+            } else if (Interpreter.isNumber(token)) {
+                phase1.push(new NumberValue(token));
+            } else if (Interpreter.isIdentifier(token)) {
+                phase1.push(new Identifier(token));
+            } else {
+                phase1.push(token);
+            }
+        }
+
+        // second pass: multiplicative operators
+        const phase2 = [];
+        for (let i = 0; i < phase1.length; i++) {
+            const token = phase1[i];
+            if (token === '*') {
+                const left = phase2.pop();
+                const right = phase1[i + 1];
+                phase2.push(new Multiplication(left, right));
+                i++;
+            } else if (token === '/') {
+                const left = phase2.pop();
+                const right = phase1[i + 1];
+                phase2.push(new Division(left, right));
+                i++;
+            } else if (token === '%') {
+                const left = phase2.pop();
+                const right = phase1[i + 1];
+                phase2.push(new Modulus(left, right));
+                i++;
+            } else {
+                phase2.push(token);
+            }
+        }
+
+        // final pass: addition and subtraction
+        let treeRoot = phase2[0];
+        for (let i = 1; i < phase2.length; i += 2) {
+            const operator = phase2[i];
+            const nextOperand = phase2[i + 1];
+            if (operator === '+') {
+                treeRoot = new Addition(treeRoot, nextOperand);
+            } else if (operator === '-') {
+                treeRoot = new Subtraction(treeRoot, nextOperand);
+            } else {
+                throw new Error(`Could not parse expression: ${tokens.slice(start, end)}`);
             }
         }
         return treeRoot;
-
-        function parseFactor(index) {
-            const token = tokens[index];
-            if (token === '(') {
-                const newEnd = findClosingBracket(index);
-                const subtree = Interpreter.parseTokens(tokens, index + 1, newEnd);
-                return [new BracketExpression(subtree), newEnd];
-            } else if (Interpreter.isIdentifier(token)) {
-                return [new Identifier(token), index];
-            } else {
-                return [new NumberValue(parseFloat(token)), index];
-            }
-        }
 
         function findClosingBracket(start) {
             let numBrackets = 0;
