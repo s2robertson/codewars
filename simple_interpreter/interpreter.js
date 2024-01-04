@@ -70,6 +70,8 @@ class Assignment extends Operator {
     }
 }
 
+const operators = ['+', '-', '*', '/', '%'];
+
 class Interpreter {
     constructor() {
         this.vars = new Map();
@@ -93,87 +95,70 @@ class Interpreter {
     input(expr) {
         const tokens = Interpreter.tokenize(expr);
         if (tokens.length === 0) return '';
-        const expressionTree = this.parseTokens(tokens);
+        const expressionTree = this.parseExpression(tokens);
         return expressionTree.eval(this.vars);
     }
 
-    parseTokens(tokens, start = 0, end = tokens.length) {
-        // first pass: assignments and bracket expressions
-        const phase1 = [];
-        for (let i = start; i < end; i++) {
-            const token = tokens[i];
-            if (token === '(') {
-                const newEnd = findClosingBracket(i);
-                phase1.push(this.parseTokens(tokens, i + 1, newEnd));
-                i = newEnd;
-            } else if (token === '=') {
-                const identifier = phase1.pop();
-                const rightSubtree = this.parseTokens(tokens, i + 1, end);
-                phase1.push(new Assignment(identifier, rightSubtree));
-                break;
-            } else if (Interpreter.isNumber(token)) {
-                phase1.push(new NumberValue(token));
+    parseExpression(tokens) {
+        const astFragments = tokens.map(token => {
+            if (Interpreter.isNumber(token)) {
+                return new NumberValue(token);
             } else if (Interpreter.isIdentifier(token)) {
-                phase1.push(new Identifier(token));
+                return new Identifier(token);
             } else {
-                phase1.push(token);
+                return token;
             }
-        }
+        });
+        reduceAST(0);
+        return astFragments[0];
 
-        // second pass: multiplicative operators
-        const phase2 = [];
-        for (let i = 0; i < phase1.length; i++) {
-            const token = phase1[i];
-            if (token === '*') {
-                const left = phase2.pop();
-                const right = phase1[i + 1];
-                phase2.push(new Multiplication(left, right));
-                i++;
-            } else if (token === '/') {
-                const left = phase2.pop();
-                const right = phase1[i + 1];
-                phase2.push(new Division(left, right));
-                i++;
-            } else if (token === '%') {
-                const left = phase2.pop();
-                const right = phase1[i + 1];
-                phase2.push(new Modulus(left, right));
-                i++;
-            } else {
-                phase2.push(token);
-            }
-        }
-
-        // final pass: addition and subtraction
-        let treeRoot = phase2[0];
-        for (let i = 1; i < phase2.length; i += 2) {
-            const operator = phase2[i];
-            const nextOperand = phase2[i + 1];
-            if (operator === '+') {
-                treeRoot = new Addition(treeRoot, nextOperand);
-            } else if (operator === '-') {
-                treeRoot = new Subtraction(treeRoot, nextOperand);
-            } else {
-                throw new Error(`Could not parse expression: ${tokens.slice(start, end)}`);
-            }
-        }
-        return treeRoot;
-
-        function findClosingBracket(start) {
-            let numBrackets = 0;
-            for (let i = start; i < tokens.length; i++) {
-                if (tokens[i] === '(') {
-                    numBrackets++;
-                } else if (tokens[i] === ')') {
-                    numBrackets--;
-                    if (numBrackets === 0) {
-                        return i;
-                    }
+        function reduceAST(start) {
+            let i = start;
+            while (true) {
+                if (astFragments[i] === '(') {
+                    // parse sub-expression
+                    reduceAST(i + 1);
+                    astFragments.splice(i, 3, astFragments[i + 1]);
+                }
+                // TODO: if astFragments[i] is a function, call reduceAST on i + 1, ... i + numArgs
+                else if (astFragments[i] instanceof Identifier && astFragments[i + 1] === '=') {
+                    // parse right subtree
+                    reduceAST(i + 2);
+                    astFragments.splice(i, 3, new Assignment(astFragments[i], astFragments[i + 2]));
+                    break;
+                } else if (operators.includes(astFragments[i + 1])) {
+                    i += 2;
+                } else {
+                    break;
                 }
             }
-            throw new Error(`Unclosed bracket: ${tokens.slice(start).join(' ')}`);
+            const end = i;
+
+            i = start;
+            while (i < end) {
+                if (astFragments[i] === '*') {
+                    astFragments.splice(i - 1, 3, new Multiplication(astFragments[i - 1], astFragments[i + 1]));
+                } else if (astFragments[i] === '/') {
+                    astFragments.splice(i - 1, 3, new Division(astFragments[i - 1], astFragments[i + 1]));
+                } else if (astFragments[i] === '%') {
+                    astFragments.splice(i - 1, 3, new Modulus(astFragments[i - 1], astFragments[i + 1]));
+                } else {
+                    i++;
+                }
+            }
+
+            i = start;
+            while (i < end) {
+                if (astFragments[i] === '+') {
+                    astFragments.splice(i - 1, 3, new Addition(astFragments[i - 1], astFragments[i + 1]));
+                } else if (astFragments[i] === '-') {
+                    astFragments.splice(i - 1, 3, new Subtraction(astFragments[i - 1], astFragments[i + 1]));
+                } else {
+                    i++;
+                }
+            }
         }
-    }
+    }    
 }
 
 module.exports = Interpreter;
