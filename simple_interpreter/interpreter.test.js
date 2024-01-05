@@ -35,3 +35,28 @@ test('parentheses', () => {
     expect(interpreter.input('(4 + 2) * 3')).toBe(18);
     expect(interpreter.input('(8 - (4 + 2)) * 3')).toBe(6);
 })
+
+test('functions', () => {
+    expect(() => interpreter.input('fn avg x y => (x + y) / 2')).not.toThrow();
+    expect(interpreter.input('avg 4 2')).toBe(3);
+    expect(() => interpreter.input('avg 7')).toThrow();
+    expect(() => interpreter.input('avg 7 2 4')).toThrow();
+})
+
+test('invalid function: external variable not allowed', () => {
+    interpreter.input('y = 3');
+    expect(() => interpreter.input('fn add x => x + y')).toThrow('ERROR: Invalid identifier \'y\' in function body.');
+})
+
+test('nested function calls', () => {
+    interpreter.input('fn avg x y => (x + y) / 2');
+    interpreter.input('fn id x => x');
+    expect(interpreter.input('avg id 5 id 7')).toBe(6);
+})
+
+test('naming conflicts', () => {
+    interpreter.input('x = 4');
+    expect(() => interpreter.input('fn x y => y')).toThrow();
+    expect(() => interpreter.input('fn id x => x')).not.toThrow();
+    expect(() => interpreter.input('id = 4')).toThrow();
+})
