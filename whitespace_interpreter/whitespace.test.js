@@ -67,21 +67,45 @@ test("Testing output of letters A through C with comments", function () {
 });
 
 test("Testing stack functionality", function () {
-  var pushTwice = "   \t\t\n   \t\t\n\t\n \t\t\n \t\n\n\n";
-  var duplicate = "   \t\t\n \n \t\n \t\t\n \t\n\n\n";
-  var duplicateN1 = "   \t\n   \t \n   \t\t\n \t  \t \n\t\n \t\n\n\n";
-  var duplicateN2 = "   \t\n   \t \n   \t\t\n \t  \t\n\t\n \t\n\n\n";
-  var duplicateN3 = "   \t\n   \t \n   \t\t\n \t   \n\t\n \t\n\n\n";
-  var swap = "   \t\t\n   \t \n \n\t\t\n \t\t\n \t\n\n\n";
-  var discard = "   \t\t\n   \t \n \n\t \n\n\t\n \t\n\n\n";
-  var slide = "   \t\t\n   \t \n   \t\n   \t  \n   \t\t \n   \t \t\n   \t\t\t\n \n\t \t\n \t\t\n\t\n \t\t\n \t\t\n \t\t\n \t\n\n\n";
-  
-  expect(whitespace(pushTwice)).toBe("33");
-  expect(whitespace(duplicate)).toBe("33");
-  expect(whitespace(duplicateN1)).toBe("1");
-  expect(whitespace(duplicateN2)).toBe("2");
-  expect(whitespace(duplicateN3)).toBe("3");
-  expect(whitespace(swap)).toBe("32");
-  expect(whitespace(discard)).toBe("2");
-  expect(whitespace(slide)).toBe("5123");
+    // space (stack manipulation)
+    //   space (read number and push onto stack)
+    //     space (positive) =>tab (1)*2->\n (end) (overall: 3)
+    // repeat prev
+    // tab->\n (I/O)
+    //   space->tab (pop stack, output as number)
+    // repeat prev
+    // \n (flow control)
+    //   \n->\n (exit program)
+    var pushTwice = "   \t\t\n   \t\t\n\t\n \t\t\n \t\n\n\n";
+    expect(whitespace(pushTwice)).toBe("33");
+
+    // space->space (read number, push onto stack)
+    //   space->tab (1)*2->\n (end) (overall 3)
+    // space (stack manipulation)
+    //   \n->space (duplicate top value on stack)
+    // tab->\n (I/O)
+    //   space->tab (pop stack, output as number)
+    // repeat prev
+    // \n (flow control)
+    //   \n\n (exit program)
+    var duplicate = "   \t\t\n \n \t\n \t\t\n \t\n\n\n";
+    expect(whitespace(duplicate)).toBe("33");
+
+    var duplicateN1 = "   \t\n   \t \n   \t\t\n \t  \t \n\t\n \t\n\n\n";
+    expect(whitespace(duplicateN1)).toBe("1");
+
+    var duplicateN2 = "   \t\n   \t \n   \t\t\n \t  \t\n\t\n \t\n\n\n";
+    expect(whitespace(duplicateN2)).toBe("2");
+
+    var duplicateN3 = "   \t\n   \t \n   \t\t\n \t   \n\t\n \t\n\n\n";
+    expect(whitespace(duplicateN3)).toBe("3");
+
+    var swap = "   \t\t\n   \t \n \n\t\t\n \t\t\n \t\n\n\n";
+    expect(whitespace(swap)).toBe("32");
+
+    var discard = "   \t\t\n   \t \n \n\t \n\n\t\n \t\n\n\n";
+    expect(whitespace(discard)).toBe("2");
+
+    var slide = "   \t\t\n   \t \n   \t\n   \t  \n   \t\t \n   \t \t\n   \t\t\t\n \n\t \t\n \t\t\n\t\n \t\t\n \t\t\n \t\t\n \t\n\n\n";
+    expect(whitespace(slide)).toBe("5123");
 });
