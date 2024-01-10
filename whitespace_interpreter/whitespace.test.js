@@ -125,6 +125,14 @@ test("Testing stack functionality", function () {
     var swap = "   \t\t\n   \t \n \n\t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(swap)).toBe("32");
 
+    // space->space
+    //   space->tab*2->\n (3) col 29
+    // space->space
+    //   space->tab->space->\n (2) col 37
+    // space->\n->tab (swap top of stack) col 42
+    // space->\n->\n (discard top value from stack) col 47
+    // tab->\n->space->tab (pop stack, output as number) col 54
+    // exit program
     var discard = "   \t\t\n   \t \n \n\t \n\n\t\n \t\n\n\n";
     expect(whitespace(discard)).toBe("2");
 

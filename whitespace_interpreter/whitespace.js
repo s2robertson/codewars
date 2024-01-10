@@ -13,7 +13,8 @@ function whitespace(code, input) {
         ' ': readNumberToStack,
         '\t ': readNumberAndDuplicateStackItem,
         '\n ': duplicateTopOfStack,
-        '\n\t': swapTopStackElements
+        '\n\t': swapTopStackElements,
+        '\n\n': discardTopOfStack
     };
     const ioCommands = {
         '  ': popStackAndOutputAsChar,
@@ -128,6 +129,13 @@ function whitespace(code, input) {
         const x = stack.pop();
         const y = stack.pop();
         stack.push(x, y);
+    }
+
+    function discardTopOfStack() {
+        if (stack.length < 1) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        stack.pop();
     }
 
     // *** I/O ***
