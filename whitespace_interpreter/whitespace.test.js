@@ -112,6 +112,16 @@ test("Testing stack functionality", function () {
     var duplicateN3 = "   \t\n   \t \n   \t\t\n \t   \n\t\n \t\n\n\n";
     expect(whitespace(duplicateN3)).toBe("3");
 
+    // space->space (read number, push onto stack)
+    //   space->tab*2->\n (3) col 26
+    // space->space
+    //   space->tab->space->\n (2) col 34
+    // space (stack manipulation)
+    //   \n->tab (swap top 2 stack elements) col 39
+    // tab->\n (I/O)
+    //   space->tab (pop, output as number) col 46
+    // repeat prev
+    // exit program
     var swap = "   \t\t\n   \t \n \n\t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(swap)).toBe("32");
 
