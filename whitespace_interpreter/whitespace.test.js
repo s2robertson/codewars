@@ -19,6 +19,9 @@ test("Testing push, output of numbers 0 through 3", function () {
 
     var output0 = "    \n\t\n \t\n\n\n";
     expect(whitespace(output0)).toBe("0");
+
+    var altOutput0 = '   \n\t\n \t\n\n\n';
+    expect(whitespace(altOutput0)).toBe('0');
 });
 
 test("Testing ouput of numbers -1 through -3", function () {
@@ -67,42 +70,30 @@ test("Testing output of letters A through C with comments", function () {
 });
 
 test("Testing stack functionality", function () {
-    // space (stack manipulation)
-    //   space (read number and push onto stack)
-    //     space (positive) =>tab (1)*2->\n (end) (overall: 3)
-    // repeat prev
-    // tab->\n (I/O)
-    //   space->tab (pop stack, output as number)
-    // repeat prev
-    // \n (flow control)
-    //   \n->\n (exit program)
+    // '   \t\t\n' add number (3) to stack (col 31)
+    // '   \t\t\n' repeat prev (col 40)
+    // '\t\n \t' pop stack, output as number
+    // '\t\n \t' repeat prev (col 47)
+    // '\n\n\n' exit program
     var pushTwice = "   \t\t\n   \t\t\n\t\n \t\t\n \t\n\n\n";
     expect(whitespace(pushTwice)).toBe("33");
 
-    // space->space (read number, push onto stack)
-    //   space->tab (1)*2->\n (end) (overall 3)
-    // space (stack manipulation)
-    //   \n->space (duplicate top value on stack)
-    // tab->\n (I/O)
-    //   space->tab (pop stack, output as number)
-    // repeat prev
-    // \n (flow control)
-    //   \n\n (exit program)
+    // '   \t\t\n' add number (3) to stack (col 31)
+    // ' \n ' duplicate top value on stack (col 35)
+    // '\t\n \t' pop stack, output as number (col 42)
+    // '\t\n \t' repeat prev (col 49)
+    // '\n\n\n' exit program
     var duplicate = "   \t\t\n \n \t\n \t\t\n \t\n\n\n";
     expect(whitespace(duplicate)).toBe("33");
 
-    // space->space (read number, push onto stack)
-    //   space (positive)->tab (1)->\n (end) (1) col 31
-    // space->space (read number, push onto stack)
-    //   space (positive)->tab (1)->space (0)->\n (end) (2) col 39
-    // space->space (number)
-    //   space->tab->tab->\n (3) col 48
-    // space (stack manipulation)
-    //   tab->space (read number (n), duplicate n-th value from top of stack) col 52
-    //     space->tab->space->\n (2) col 58
-    // tab->\n (I/O)
-    //   space->tab (pop, output as number) col 65
-    // \n->\n->\n (exit program)
+    // '   \t\n' add number (1) to stack (col 31)
+    // '   \t \n' add number (2) to stack (col 39)
+    // '   \t\t\n' add number (3) to stack (col 48)
+    // stack = [1, 2, 3]
+    // '  \t  \t \n' read number (2), duplicate 2nd value from top of stack, 0-indexed (col 58)
+    // stack = [1, 2, 3, 1]
+    // '\t\n \t' pop stack, output as number (col 65)
+    // '\n\n\n' exit program
     var duplicateN1 = "   \t\n   \t \n   \t\t\n \t  \t \n\t\n \t\n\n\n";
     expect(whitespace(duplicateN1)).toBe("1");
 
@@ -112,56 +103,41 @@ test("Testing stack functionality", function () {
     var duplicateN3 = "   \t\n   \t \n   \t\t\n \t   \n\t\n \t\n\n\n";
     expect(whitespace(duplicateN3)).toBe("3");
 
-    // space->space (read number, push onto stack)
-    //   space->tab*2->\n (3) col 26
-    // read num
-    //   space->tab->space->\n (2) col 34
-    // space (stack manipulation)
-    //   \n->tab (swap top 2 stack elements) col 39
-    // tab->\n (I/O)
-    //   space->tab (pop, output as number) col 46
-    // repeat prev
-    // exit program
+    // '   \t\t\n' add number (3) to stack (col 26)
+    // '   \t \n' add number (2) to stack (col 34)
+    // ' \n\t' swap top 2 stack elements (col 39)
+    // '\t\n \t' pop stack, output as number (col 46)
+    // '\t\n \t' repeat prev
+    // '\n\n\n' exit program
     var swap = "   \t\t\n   \t \n \n\t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(swap)).toBe("32");
 
-    // read num
-    //   space->tab*2->\n (3) col 29
-    // read num
-    //   space->tab->space->\n (2) col 37
-    // space->\n->tab (swap top of stack) col 42
-    // space->\n->\n (discard top value from stack) col 47
-    // tab->\n->space->tab (pop stack, output as number) col 54
-    // exit program
+    // '   \t\t\n' add number (3) to stack (col 29)
+    // '   \t \n' add number (2) to stack (col 37)
+    // ' \n\t' swap top 2 stack elements (col 42)
+    // ' \n\n' discard top element from stack (col 47)
+    // '\t\n \t' pop stack, output as number (col 54)
+    // '\n\n\n' exit program
     var discard = "   \t\t\n   \t \n \n\t \n\n\t\n \t\n\n\n";
     expect(whitespace(discard)).toBe("2");
 
-    // read num
-    //   space->tab*2->\n (3) col 27
-    // read num
-    //   space->tab->space->\n (2) col 35
-    // read num
-    //   space->tab->\n (1) col 42
-    // read num
-    //   space->tab->space*2->\n (4) col 51
-    // read num
-    //   space->tab*2->space->\n (6) col 61
-    // read num
-    //   space->tab->space->tab->\n (5) col 71
-    // read num
-    //   space->tab*3->\n (7) col 82
+    // '   \t\t\n' add number (3) to stack (col 27)
+    // '   \t \n' add number (2) to stack (col 35)
+    // '   \t\n' add number (1) to stack (col 42)
+    // '   \t  \n' add number (4) to stack (col 51)
+    // '   \t\t \n' add number (6) to stack (col 61)
+    // '   \t \t\n' add number (5) to stack (col 71)
+    // '   \t\t\t\n' add number (7) to stack (col 82)
     // stack = [3, 2, 1, 4, 6, 5, 7]
-    // space->\n->tab (swap top of stack) col 87
+    // ' \n\t' swap top 2 stack elements (col 87)
     // stack = [3, 2, 1, 4, 6, 7, 5]
-    // space->tab->\n (read number, discard n elements from below top of stack)
-    //   space->tab*2->\n (3) col 99
-    // stack = [3, 2, 1]
-    // I/O
-    //   space->tab (pop stack, output as number) col 106
-    // repeat last col 113
-    // repeat last col 120
-    // repeat last col 127
-    // exit program
+    // ' \t\n \t\t\n' read number (3), discard n elements from below top of stack
+    // stack = [3, 2, 1, 5]
+    // '\t\n \t' pop stack, output as number (col 106)
+    // '\t\n \t' repeat last (col 113)
+    // '\t\n \t' repeat last (col 120)
+    // '\t\n \t' repeat last (col 127)
+    // '\n\n\n' exit program
     var slide = "   \t\t\n   \t \n   \t\n   \t  \n   \t\t \n   \t \t\n   \t\t\t\n \n\t \t\n \t\t\n\t\n \t\t\n \t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(slide)).toBe("5123");
 });
