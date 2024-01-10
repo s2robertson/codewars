@@ -1,30 +1,40 @@
 const whitespace = require('./whitespace');
 
 test("Testing push, output of numbers 0 through 3", function () {
-  var output1 = "   \t\n\t\n \t\n\n\n";
-  var output2 = "   \t \n\t\n \t\n\n\n";
-  var output3 = "   \t\t\n\t\n \t\n\n\n";
-  var output0 = "    \n\t\n \t\n\n\n";
-  
-  expect(whitespace(output1)).toBe("1");
-  expect(whitespace(output2)).toBe("2");
-  expect(whitespace(output3)).toBe("3");
-  expect(whitespace(output0)).toBe("0");
+    // space (stack manipulation)
+    //   space (read number and push onto stack)
+    //     space (positive)->tab (1)->\n (end number)
+    // tab->\n (I/O)
+    //   space->tab (pop value, output as number)
+    // \n (flow control)
+    //   \n->\n (exit program)
+    var output1 = "   \t\n\t\n \t\n\n\n";
+    expect(whitespace(output1)).toBe("1");
+
+    var output2 = "   \t \n\t\n \t\n\n\n";
+    expect(whitespace(output2)).toBe("2");
+
+    var output3 = "   \t\t\n\t\n \t\n\n\n";
+    expect(whitespace(output3)).toBe("3");
+
+    var output0 = "    \n\t\n \t\n\n\n";
+    expect(whitespace(output0)).toBe("0");
 });
 
 test("Testing ouput of numbers -1 through -3", function () {
-  var outputNegative1 = "  \t\t\n\t\n \t\n\n\n";
-  var outputNegative2 = "  \t\t \n\t\n \t\n\n\n";
-  var outputNegative3 = "  \t\t\t\n\t\n \t\n\n\n";
-  
-  expect(whitespace(outputNegative1)).toBe("-1");
-  expect(whitespace(outputNegative2)).toBe("-2");
-  expect(whitespace(outputNegative3)).toBe("-3");
+    var outputNegative1 = "  \t\t\n\t\n \t\n\n\n";
+    expect(whitespace(outputNegative1)).toBe("-1");
+
+    var outputNegative2 = "  \t\t \n\t\n \t\n\n\n";
+    expect(whitespace(outputNegative2)).toBe("-2");
+
+    var outputNegative3 = "  \t\t\t\n\t\n \t\n\n\n";
+    expect(whitespace(outputNegative3)).toBe("-3");
 });
 
 test("Testing simple flow control edge case", function () {
-  // Expecting exception for unclean termination
-  expect(() => whitespace("")).toThrow();
+    // Expecting exception for unclean termination
+    expect(() => whitespace("")).toThrow('Unclean termination: programs should end with \'\\n\\n\\n\'');
 });
 
 test("Testing output of letters A through C", function () {
