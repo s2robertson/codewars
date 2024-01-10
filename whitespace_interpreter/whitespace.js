@@ -13,6 +13,7 @@ function whitespace(code, input) {
         ' ': readNumberToStack
     };
     const ioCommands = {
+        '  ': popStackAndOutputAsChar,
         ' \t': popStackAndOutputAsNumber
     };
     const flowControlCommands = {
@@ -102,6 +103,14 @@ function whitespace(code, input) {
     }
 
     // *** I/O ***
+
+    function popStackAndOutputAsChar() {
+        const num = stack.pop();
+        if (num === undefined) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        output += String.fromCharCode(num);
+    }
 
     function popStackAndOutputAsNumber() {
         const num = stack.pop();

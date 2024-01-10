@@ -5,7 +5,7 @@ test("Testing push, output of numbers 0 through 3", function () {
     //   space (read number and push onto stack)
     //     space (positive)->tab (1)->\n (end number)
     // tab->\n (I/O)
-    //   space->tab (pop value, output as number)
+    //   space->tab (pop stack, output as number)
     // \n (flow control)
     //   \n->\n (exit program)
     var output1 = "   \t\n\t\n \t\n\n\n";
@@ -38,23 +38,32 @@ test("Testing simple flow control edge case", function () {
 });
 
 test("Testing output of letters A through C", function () {
-  var outputA = "   \t     \t\n\t\n  \n\n\n";
-  var outputB = "   \t    \t \n\t\n  \n\n\n";
-  var outputC = "   \t    \t\t\n\t\n  \n\n\n";
-  
-  expect(whitespace(outputA)).toBe("A");
-  expect(whitespace(outputB)).toBe("B");
-  expect(whitespace(outputC)).toBe("C");
+    // space (stack manipulation)
+    //   space (read number and push onto stack)
+    //     space (positive)->tab (1)->space (0)*5->tab (1)->\n (end) (overall: 65)
+    // tab->\n (I/O)
+    //   space->space (pop stack, output as character)
+    // \n (flow control)
+    //   \n->\n (exit program)
+    var outputA = "   \t     \t\n\t\n  \n\n\n";
+    expect(whitespace(outputA)).toBe("A");
+
+    var outputB = "   \t    \t \n\t\n  \n\n\n";
+    expect(whitespace(outputB)).toBe("B");
+
+    var outputC = "   \t    \t\t\n\t\n  \n\n\n";
+    expect(whitespace(outputC)).toBe("C");
 });
 
 test("Testing output of letters A through C with comments", function () {
-  var outputA = "blahhhh   \targgggghhh     \t\n\t\n  \n\n\n";
-  var outputB = " I heart \t  cats  \t \n\t\n  \n\n\n";
-  var outputC = "   \t  welcome  \t\t\n\t\n to the\nnew\nworld\n";
+    var outputA = "blahhhh   \targgggghhh     \t\n\t\n  \n\n\n";
+    expect(whitespace(outputA)).toBe("A");
 
-  expect(whitespace(outputA)).toBe("A");
-  expect(whitespace(outputB)).toBe("B");
-  expect(whitespace(outputC)).toBe("C");
+    var outputB = " I heart \t  cats  \t \n\t\n  \n\n\n";
+    expect(whitespace(outputB)).toBe("B");
+
+    var outputC = "   \t  welcome  \t\t\n\t\n to the\nnew\nworld\n";
+    expect(whitespace(outputC)).toBe("C");
 });
 
 test("Testing stack functionality", function () {
