@@ -114,7 +114,7 @@ test("Testing stack functionality", function () {
 
     // space->space (read number, push onto stack)
     //   space->tab*2->\n (3) col 26
-    // space->space
+    // read num
     //   space->tab->space->\n (2) col 34
     // space (stack manipulation)
     //   \n->tab (swap top 2 stack elements) col 39
@@ -125,9 +125,9 @@ test("Testing stack functionality", function () {
     var swap = "   \t\t\n   \t \n \n\t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(swap)).toBe("32");
 
-    // space->space
+    // read num
     //   space->tab*2->\n (3) col 29
-    // space->space
+    // read num
     //   space->tab->space->\n (2) col 37
     // space->\n->tab (swap top of stack) col 42
     // space->\n->\n (discard top value from stack) col 47
@@ -136,6 +136,32 @@ test("Testing stack functionality", function () {
     var discard = "   \t\t\n   \t \n \n\t \n\n\t\n \t\n\n\n";
     expect(whitespace(discard)).toBe("2");
 
+    // read num
+    //   space->tab*2->\n (3) col 27
+    // read num
+    //   space->tab->space->\n (2) col 35
+    // read num
+    //   space->tab->\n (1) col 42
+    // read num
+    //   space->tab->space*2->\n (4) col 51
+    // read num
+    //   space->tab*2->space->\n (6) col 61
+    // read num
+    //   space->tab->space->tab->\n (5) col 71
+    // read num
+    //   space->tab*3->\n (7) col 82
+    // stack = [3, 2, 1, 4, 6, 5, 7]
+    // space->\n->tab (swap top of stack) col 87
+    // stack = [3, 2, 1, 4, 6, 7, 5]
+    // space->tab->\n (read number, discard n elements from below top of stack)
+    //   space->tab*2->\n (3) col 99
+    // stack = [3, 2, 1]
+    // I/O
+    //   space->tab (pop stack, output as number) col 106
+    // repeat last col 113
+    // repeat last col 120
+    // repeat last col 127
+    // exit program
     var slide = "   \t\t\n   \t \n   \t\n   \t  \n   \t\t \n   \t \t\n   \t\t\t\n \n\t \t\n \t\t\n\t\n \t\t\n \t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(slide)).toBe("5123");
 });

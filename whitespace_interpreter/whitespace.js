@@ -12,6 +12,7 @@ function whitespace(code, input) {
     const stackCommands = {
         ' ': readNumberToStack,
         '\t ': readNumberAndDuplicateStackItem,
+        '\t\n': readNumberAndDiscardBelowTopOfStack,
         '\n ': duplicateTopOfStack,
         '\n\t': swapTopStackElements,
         '\n\n': discardTopOfStack
@@ -113,6 +114,14 @@ function whitespace(code, input) {
             throw new Error(`Not enough items on stack: position ${codePos - 2}`);
         }
         stack.push(stack.at(-1 - stackIndex));
+    }
+
+    function readNumberAndDiscardBelowTopOfStack() {
+        let num = readCodeNumber();
+        if (num < 0 || num >= stack.length) {
+            num = stack.length - 1;
+        }
+        stack.splice(-1 - num, num);
     }
 
     function duplicateTopOfStack() {
