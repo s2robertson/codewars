@@ -11,6 +11,7 @@ function unbleach (n) {
 function whitespace(code, input) {
     const stackCommands = {
         ' ': readNumberToStack,
+        '\t ': readNumberAndDuplicateStackItem,
         '\n ': duplicateTopOfStack
     };
     const ioCommands = {
@@ -101,6 +102,15 @@ function whitespace(code, input) {
     function readNumberToStack() {
         const num = readCodeNumber();
         stack.push(num);
+    }
+
+    function readNumberAndDuplicateStackItem() {
+        // 0-indexed
+        const stackIndex = readCodeNumber();
+        if (stack.length < stackIndex) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        stack.push(stack.at(-1 - stackIndex));
     }
 
     function duplicateTopOfStack() {

@@ -91,6 +91,18 @@ test("Testing stack functionality", function () {
     var duplicate = "   \t\t\n \n \t\n \t\t\n \t\n\n\n";
     expect(whitespace(duplicate)).toBe("33");
 
+    // space->space (read number, push onto stack)
+    //   space (positive)->tab (1)->\n (end) (1) col 31
+    // space->space (read number, push onto stack)
+    //   space (positive)->tab (1)->space (0)->\n (end) (2) col 39
+    // space->space (number)
+    //   space->tab->tab->\n (3) col 48
+    // space (stack manipulation)
+    //   tab->space (read number (n), duplicate n-th value from top of stack) col 52
+    //     space->tab->space->\n (2) col 58
+    // tab->\n (I/O)
+    //   space->tab (pop, output as number) col 65
+    // \n->\n->\n (exit program)
     var duplicateN1 = "   \t\n   \t \n   \t\t\n \t  \t \n\t\n \t\n\n\n";
     expect(whitespace(duplicateN1)).toBe("1");
 
