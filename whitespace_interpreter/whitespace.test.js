@@ -1,5 +1,7 @@
 const whitespace = require('./whitespace');
 
+const stackEmptyStr = 'Not enough items on stack';
+
 test("Testing push, output of numbers 0 through 3", function () {
     // space (stack manipulation)
     //   space (read number and push onto stack)
@@ -173,8 +175,6 @@ describe('Testing stack functionality', () => {
 })
 
 describe('Stack manipulation errors', () => {
-    const stackEmptyStr = 'Not enough items on stack';
-
     test('Trying to output with empty stack', () => {
         // '\t\n \t' pop stack, output as number (error, stack is empty)
         // '\n\n\n' exit program
@@ -352,11 +352,94 @@ test('Heap error', () => {
     // '\t\t\t' pop stack (error) and try to read heap
     // '\n\n\n' exit program
     const heapErr = '\t\t\t\n\n\n';
-    expect(() => whitespace(heapErr)).toThrow('Not enough items on stack');
+    expect(() => whitespace(heapErr)).toThrow(stackEmptyStr);
 
     // '   \t\t\n' add number (3) to stack
     // '\t\t\t' pop 3 and push value at heap address 3 (error)
     // '\n\n\n' exit program
     const heapErr2 = '   \t\t\n\t\t\t\n\n\n';
     expect(() => whitespace(heapErr2)).toThrow('Heap lookup failed');
+})
+
+describe('I/O', () => {
+    const eofStr = 'Attempting to read past end of input';
+
+    test('Character input', () => {
+        // '   \n' add number (0) to stack
+        // '\t\n\t ' read character (a) from input, pop address (b) from stack, store a (as character code) at heap[b]
+        // '   \n' add number (0) to stack
+        // '\t\t\t' pop address (a), push value at heap[a]
+        // '\t\n  ' pop value, output as character
+        // '\n\n\n' exit program
+        const charInput = '   \n\t\n\t    \n\t\t\t\t\n  \n\n\n';
+        expect(whitespace(charInput, 'a')).toBe('a');
+    })
+
+    test('Number input', () => {
+        // '   \t\n' push number (1)
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '   \t\n' push number (1)
+        // '\t\t\t' pop address (a) push value at heap[a]
+        // '\t\n \t' pop value, output as number
+        // '\n\n\n' exit program
+        const numInput = '   \t\n\t\n\t\t   \t\n\t\t\t\t\n \t\n\n\n';
+        expect(whitespace(numInput, '15\n')).toBe('15');
+    })
+
+    test('Number input (hex)', () => {
+        // '   \t\n' push number (1)
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '   \t\n' push number (1)
+        // '\t\t\t' pop address (a) push value at heap[a]
+        // '\t\n \t' pop value, output as number
+        // '\n\n\n' exit program
+        const hexInput = '   \t\n\t\n\t\t   \t\n\t\t\t\t\n \t\n\n\n';
+        expect(whitespace(hexInput, '0xb\n')).toBe('11');
+    })
+
+    test('Attempting to read character from empty input should throw', () => {
+        // '   \n' push number (0)
+        // '\t\n  ' read character (a) from input, pop address (b) from stack, store a (as char code) at heap[b]
+        // '\n\n\n' exit
+        const charInputErr = '   \n\t\n  \n\n\n';
+        expect(() => whitespace(charInputErr, '')).toThrow(eofStr)
+    })
+
+    test('Attempting to read character when stack is empty should throw', () => {
+        // '\t\n\t ' read character (a) from input, pop address (b) from stack (missing), store a at heap[b]
+        // '\n\n\n' exit
+        const charInputErr2 = '\t\n\t \n\n\n';
+        expect(() => whitespace(charInputErr2, 'a')).toThrow(stackEmptyStr);
+    })
+
+    test('Attempting to read number from empty input should throw', () => {
+        // '   \n' push number (0)
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '\n\n\n' exit
+        const numInputErr = '   \n\t\n\t\t\n\n\n';
+        expect(() => whitespace(numInputErr, '')).toThrow(eofStr);
+    })
+    
+    test('Attempting to read unterminated number should throw', () => {
+        // '   \n' push number (0)
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '\n\n\n' exit
+        const numInputErr2 = '   \n\t\n\t\t\n\n\n';
+        expect(() => whitespace(numInputErr2, '15')).toThrow(eofStr);
+    })
+    
+    test('Attempting to read number when stack is empty should throw', () => {
+        // '\t\n\t\t' read number (a) from input, pop address (b) (missing), store a at heap[b]
+        // '\n\n\n' exit
+        const numInputErr2 = '\t\n\t\t\n\n\n';
+        expect(() => whitespace(numInputErr2, '15\n')).toThrow(eofStr);
+    })
+
+    test('Attempting to exit program with unprocessed input should throw', () => {
+        // '   \n' add number (0) to stack
+        // '\t\n\t ' read character (a) from input, pop address (b) from stack, store a (as character code) at heap[b]
+        // '\n\n\n' exit program
+        const charInput = '   \n\t\n\t \n\n\n';
+        expect(() => whitespace(charInput, 'ab')).toThrow('Program ended with unread input');
+    })
 })
