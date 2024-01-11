@@ -17,6 +17,13 @@ function whitespace(code, input) {
         '\n\t': swapTopStackElements,
         '\n\n': discardTopOfStack
     };
+    const arithmeticCommands = {
+        '  ': stackAddition,
+        ' \t': stackSubtraction,
+        ' \n': stackMultiplication,
+        '\t ': stackDivision,
+        '\t\t': stackRemainder
+    };
     const ioCommands = {
         '  ': popStackAndOutputAsChar,
         ' \t': popStackAndOutputAsNumber
@@ -26,6 +33,7 @@ function whitespace(code, input) {
     }
     const commandTypes = {
         ' ': stackCommands,
+        '\t ': arithmeticCommands,
         '\t\n': ioCommands,
         '\n': flowControlCommands
     };
@@ -145,6 +153,53 @@ function whitespace(code, input) {
             throw new Error(`Not enough items on stack: position ${codePos - 2}`);
         }
         stack.pop();
+    }
+
+    // *** Arithmetic ***
+
+    function stackAddition() {
+        if (stack.length < 2) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        const a = stack.pop();
+        const b = stack.pop();
+        stack.push(b + a);
+    }
+
+    function stackSubtraction() {
+        if (stack.length < 2) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        const a = stack.pop();
+        const b = stack.pop();
+        stack.push(b - a);
+    }
+
+    function stackMultiplication() {
+        if (stack.length < 2) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        const a = stack.pop();
+        const b = stack.pop();
+        stack.push(b * a);
+    }
+
+    function stackDivision() {
+        if (stack.length < 2) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        const a = stack.pop();
+        const b = stack.pop();
+        stack.push(Math.floor(b / a));
+    }
+
+    function stackRemainder() {
+        if (stack.length < 2) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        const a = stack.pop();
+        const b = stack.pop();
+        stack.push(b - a * Math.floor(b / a));
     }
 
     // *** I/O ***

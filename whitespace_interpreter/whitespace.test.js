@@ -141,3 +141,95 @@ test("Testing stack functionality", function () {
     var slide = "   \t\t\n   \t \n   \t\n   \t  \n   \t\t \n   \t \t\n   \t\t\t\n \n\t \t\n \t\t\n\t\n \t\t\n \t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(slide)).toBe("5123");
 });
+
+test('Arithmetic', () => {
+    // '   \t \t\n' add number (5) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t   ' pop prev two numbers (a, b) and push a + b
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit program
+    const sum = '   \t \t\n   \t\t\n\t   \t\n \t\n\n\n';
+    expect(whitespace(sum)).toBe('8');
+
+    // '   \t \t\n' add number (5) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t  \t' pop a, b, push b - a
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const diff = '   \t \t\n   \t\t\n\t  \t\t\n \t\n\n\n';
+    expect(whitespace(diff)).toBe('2');
+
+    // '   \t \t\n' add number (5) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t  \n' pop a, b, push a * b
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const mult = '   \t \t\n   \t\t\n\t  \n\t\n \t\n\n\n';
+    expect(whitespace(mult)).toBe('15');
+
+    // '   \t\t\t\n' add number (7) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t \t ' pop a, b, push floor(b / a)
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const div = '   \t\t\t\n   \t\t\n\t \t \t\n \t\n\n\n';
+    expect(whitespace(div)).toBe('2');
+
+    // '  \t\t\t\t\n' add number (-7) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t \t ' pop a, b, push floor(b / a)
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const div2 = '  \t\t\t\t\n   \t\t\n\t \t \t\n \t\n\n\n';
+    expect(whitespace(div2)).toBe('-3');
+
+    // '   \t\t\t\n' add number (7) to stack
+    // '  \t\t\t\n' add number (3) to stack
+    // '\t \t ' pop a, b, push floor(b / a)
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const div3 = '   \t\t\t\n  \t\t\t\n\t \t \t\n \t\n\n\n';
+    expect(whitespace(div3)).toBe('-3');
+
+    // '  \t\t\t\t\n' add number (-7) to stack
+    // '  \t\t\t\n' add number (-3) to stack
+    // '\t \t ' pop a, b, push floor(b / a)
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const div4 = '  \t\t\t\t\n  \t\t\t\n\t \t \t\n \t\n\n\n';
+    expect(whitespace(div4)).toBe('2');
+
+    // *** For the following tests, % is defined as: remainder = dividend - divisor * floor(dividend / divisor)
+
+    // '   \t\t\t\n' add number (7) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t \t\t' pop a, b, push b % a
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const mod = '   \t\t\t\n   \t\t\n\t \t\t\t\n \t\n\n\n';
+    expect(whitespace(mod)).toBe('1');
+
+    // '  \t\t\t\t\n' add number (-7) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t \t\t' pop a, b, push b % a
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const mod2 = '  \t\t\t\t\n   \t\t\n\t \t\t\t\n \t\n\n\n';
+    expect(whitespace(mod2)).toBe('2');
+
+    // '   \t\t\t\n' add number (7) to stack
+    // '  \t\t\t\n' add number (-3) to stack
+    // '\t \t\t' pop a, b, push b % a
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const mod3 = '   \t\t\t\n  \t\t\t\n\t \t\t\t\n \t\n\n\n';
+    expect(whitespace(mod3)).toBe('-2');
+
+    // '  \t\t\t\t\n' add number (-7) to stack
+    // '  \t\t\t\n' add number (-3) to stack
+    // '\t \t\t' pop a, b, push b % a
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit
+    const mod4 = '  \t\t\t\t\n  \t\t\t\n\t \t\t\t\n \t\n\n\n';
+    expect(whitespace(mod4)).toBe('-1');
+})
