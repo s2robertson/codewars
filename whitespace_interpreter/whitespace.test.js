@@ -305,3 +305,28 @@ test('Arithmetic errors', () => {
     const modErr = '   \t\t\n   \n\t \t\t\n\n\n';
     expect(() => whitespace(modErr)).toThrow(divByZeroStr);
 })
+
+test('Heap access', () => {
+    // '   \t \t\n' add number (5) to stack
+    // '   \t\t\n' add number (3) to stack
+    // '\t\t ' pop 3, 5 from stack, store 3 at heap address 5
+    // '   \t \t\n' add number (5) to stack
+    // '\t\t\t' pop 5 from stack, push value at heap address 5
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit program
+    const heap = '   \t \t\n   \t\t\n\t\t    \t \t\n\t\t\t\t\n \t\n\n\n';
+    expect(whitespace(heap)).toBe('3');
+})
+
+test('Heap error', () => {
+    // '\t\t\t' pop stack (error) and try to read heap
+    // '\n\n\n' exit program
+    const heapErr = '\t\t\t\n\n\n';
+    expect(() => whitespace(heapErr)).toThrow('Not enough items on stack');
+
+    // '   \t\t\n' add number (3) to stack
+    // '\t\t\t' pop 3 and push value at heap address 3 (error)
+    // '\n\n\n' exit program
+    const heapErr2 = '   \t\t\n\t\t\t\n\n\n';
+    expect(() => whitespace(heapErr2)).toThrow('Heap lookup failed');
+})

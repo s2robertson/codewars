@@ -24,6 +24,10 @@ function whitespace(code, input) {
         '\t ': stackDivision,
         '\t\t': stackRemainder
     };
+    const heapAccessCommands = {
+        ' ': addToHeap,
+        '\t': readFromHeap
+    };
     const ioCommands = {
         '  ': popStackAndOutputAsChar,
         ' \t': popStackAndOutputAsNumber
@@ -34,6 +38,7 @@ function whitespace(code, input) {
     const commandTypes = {
         ' ': stackCommands,
         '\t ': arithmeticCommands,
+        '\t\t': heapAccessCommands,
         '\t\n': ioCommands,
         '\n': flowControlCommands
     };
@@ -206,6 +211,29 @@ function whitespace(code, input) {
         }
         const b = stack.pop();
         stack.push(b - a * Math.floor(b / a));
+    }
+
+    // *** Heap Access ***
+
+    function addToHeap() {
+        if (stack.length < 2) {
+            throw new Error(`Not enough items on stack: position ${codePos - 3}`);
+        }
+        const val = stack.pop();
+        const addr = stack.pop();
+        heap[addr] = val;
+    }
+
+    function readFromHeap() {
+        if (stack.length < 1) {
+            throw new Error(`Not enough items on stack: position ${codePos - 3}`);
+        }
+        const addr = stack.pop();
+        const val = heap[addr];
+        if (val === undefined) {
+            throw new Error(`Heap lookup failed: position ${codePos - 3}`);
+        }
+        stack.push(val);
     }
 
     // *** I/O ***
