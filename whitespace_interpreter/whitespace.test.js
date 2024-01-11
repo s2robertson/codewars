@@ -399,9 +399,9 @@ describe('I/O', () => {
 
     test('Attempting to read character from empty input should throw', () => {
         // '   \n' push number (0)
-        // '\t\n  ' read character (a) from input, pop address (b) from stack, store a (as char code) at heap[b]
+        // '\t\n\t ' read character (a) from input, pop address (b) from stack, store a (as char code) at heap[b]
         // '\n\n\n' exit
-        const charInputErr = '   \n\t\n  \n\n\n';
+        const charInputErr = '   \n\t\n\t \n\n\n';
         expect(() => whitespace(charInputErr, '')).toThrow(eofStr)
     })
 
@@ -432,7 +432,7 @@ describe('I/O', () => {
         // '\t\n\t\t' read number (a) from input, pop address (b) (missing), store a at heap[b]
         // '\n\n\n' exit
         const numInputErr2 = '\t\n\t\t\n\n\n';
-        expect(() => whitespace(numInputErr2, '15\n')).toThrow(eofStr);
+        expect(() => whitespace(numInputErr2, '15\n')).toThrow(stackEmptyStr);
     })
 
     test('Attempting to exit program with unprocessed input should throw', () => {
