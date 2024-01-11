@@ -30,7 +30,8 @@ function whitespace(code, input) {
     };
     const ioCommands = {
         '  ': popStackAndOutputAsChar,
-        ' \t': popStackAndOutputAsNumber
+        ' \t': popStackAndOutputAsNumber,
+        '\t ': readCharFromInput
     };
     const flowControlCommands = {
         '\n\n': exitProgram
@@ -252,6 +253,18 @@ function whitespace(code, input) {
             throw new Error(`Not enough items on stack: position ${codePos - 2}`);
         }
         output += num;
+    }
+
+    function readCharFromInput() {
+        if (inputPos >= input.length) {
+            throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+        }
+        const char = input[inputPos++];
+        if (stack.length < 1) {
+            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        }
+        const addr = stack.pop();
+        heap[addr] = char.charCodeAt(0);
     }
 
     // *** Flow Control ***
