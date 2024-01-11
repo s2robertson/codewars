@@ -118,7 +118,7 @@ function whitespace(code, input) {
     function readNumberAndDuplicateStackItem() {
         // 0-indexed
         const stackIndex = readCodeNumber();
-        if (stack.length < stackIndex) {
+        if (stack.length <= stackIndex) {
             throw new Error(`Not enough items on stack: position ${codePos - 2}`);
         }
         stack.push(stack.at(-1 - stackIndex));

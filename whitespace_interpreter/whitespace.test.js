@@ -90,7 +90,7 @@ test("Testing stack functionality", function () {
     // '   \t \n' add number (2) to stack (col 39)
     // '   \t\t\n' add number (3) to stack (col 48)
     // stack = [1, 2, 3]
-    // '  \t  \t \n' read number (2), duplicate 2nd value from top of stack, 0-indexed (col 58)
+    // ' \t  \t \n' read number (2), duplicate 2nd value from top of stack, 0-indexed (col 58)
     // stack = [1, 2, 3, 1]
     // '\t\n \t' pop stack, output as number (col 65)
     // '\n\n\n' exit program
@@ -140,7 +140,61 @@ test("Testing stack functionality", function () {
     // '\n\n\n' exit program
     var slide = "   \t\t\n   \t \n   \t\n   \t  \n   \t\t \n   \t \t\n   \t\t\t\n \n\t \t\n \t\t\n\t\n \t\t\n \t\t\n \t\t\n \t\n\n\n";
     expect(whitespace(slide)).toBe("5123");
+
+    // '   \t\t\n' add number (3) to stack
+    // '   \t \n' add number (2) to stack
+    // '   \t\n' add number (1) to stack
+    // ' \t\n\t\t\n' read number (-1) and delete all items but top from stack
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit program
+    const slide2 = '   \t\t\n   \t \n   \t\n \t\n\t\t\n\t\n \t\n\n\n';
+    expect(whitespace(slide2)).toBe('1');
+
+    // '   \t\t\n' add number (3) to stack
+    // '   \t \n' add number (2) to stack
+    // '   \t\n' add number (1) to stack
+    // ' \t\n \t  \n' read number (4) and delete all items but top from stack
+    // '\t\n \t' pop stack, output as number
+    // '\n\n\n' exit program
+    const slide3 = '   \t\t\n   \t \n   \t\n \t\n \t  \n\t\n \t\n\n\n';
+    expect(whitespace(slide3)).toBe('1');
 });
+
+test('Stack manipulation errors', () => {
+    const stackEmptyStr = 'Not enough items on stack';
+
+    // '\t\n \t' pop stack, output as number (error, stack is empty)
+    // '\n\n\n' exit program
+    const emptyOutputErr = '\t\n \t\n\n\n';
+    expect(() => whitespace(emptyOutputErr)).toThrow(stackEmptyStr);
+
+    // '   \t\n' add number (1) to stack
+    // ' \t  \t\n' duplicate stack item at 1 from end (i.e. index -2)
+    // '\n\n\n' exit program
+    const duplicationErr = '   \t\n \t  \t\n\n\n\n';
+    expect(() => whitespace(duplicationErr)).toThrow(stackEmptyStr);
+
+    // ' \n ' duplicate top item (error, stack is empty)
+    // '\n\n\n' exit program
+    const duplicationErr2 = ' \n \n\n\n';
+    expect(() => whitespace(duplicationErr2)).toThrow(stackEmptyStr);
+
+    // ' \n\t' swap top two items on stack (error, stack is empty)
+    // '\n\n\n' exit program
+    const swapErr = ' \n\t\n\n\n';
+    expect(() => whitespace(swapErr)).toThrow(stackEmptyStr);
+
+    // '   \t\n' add number (1) to stack
+    // ' \n\t' swap top two items on stack (error, only one element)
+    // '\n\n\n' exit program
+    const swapErr2 = '   \t\n \n\t\n\n\n';
+    expect(() => whitespace(swapErr2)).toThrow(stackEmptyStr);
+
+    // ' \n\n' discard top item on stack (error, stack is empty)
+    // '\n\n\n' exit program
+    const discardErr = ' \n\n\n\n\n';
+    expect(() => whitespace(discardErr)).toThrow(stackEmptyStr);
+})
 
 test('Arithmetic', () => {
     // '   \t \t\n' add number (5) to stack
