@@ -8,76 +8,93 @@ function unbleach (n) {
 }
 
 // solution
-function whitespace(code, input = '') {
-    const stackCommands = {
-        ' ': readNumberToStack,
-        '\t ': readNumberAndDuplicateStackItem,
-        '\t\n': readNumberAndDiscardBelowTopOfStack,
-        '\n ': duplicateTopOfStack,
-        '\n\t': swapTopStackElements,
-        '\n\n': discardTopOfStack
-    };
-    const arithmeticCommands = {
-        '  ': stackAddition,
-        ' \t': stackSubtraction,
-        ' \n': stackMultiplication,
-        '\t ': stackDivision,
-        '\t\t': stackRemainder
-    };
-    const heapAccessCommands = {
-        ' ': addToHeap,
-        '\t': readFromHeap
-    };
-    const ioCommands = {
-        '  ': popStackAndOutputAsChar,
-        ' \t': popStackAndOutputAsNumber,
-        '\t ': readCharFromInput,
-        '\t\t': readNumberFromInput
-    };
-    const flowControlCommands = {
-        '\n\n': exitProgram
-    }
-    const commandTypes = {
-        ' ': stackCommands,
-        '\t ': arithmeticCommands,
-        '\t\t': heapAccessCommands,
-        '\t\n': ioCommands,
-        '\n': flowControlCommands
-    };
-    let output = '', stack = [], heap = {};
-    let codePos = 0, inputPos = 0;
-    while (true) {
-        const commands = readAndGetFromMap(commandTypes);
-        if (!commands) {
-            throw new Error(`Invalid command at index ${codePos - 2}`);
-        }
-        const cmd = readAndGetFromMap(commands);
-        if (!cmd) {
-            throw new Error(`Invalid command at index ${codePos - 2}`);
-        }
+function whitespace(rawCode, input = '') {
+    let parsePos = 0;
+    const executable = parseCode();
 
+    let execPos = 0, inputPos = 0, finished = false;
+    let output = '', stack = [], heap = {};
+    while (!finished && execPos < executable.length) {
+        const cmd = executable[execPos];
         if (cmd()) {
             // only the exit command should return a value
-            break;
+            finished = true;
         }
+        execPos++;
+    }
+
+    if (!finished) {
+        throw new Error('Unclean termination: programs should end with \'\\n\\n\\n\'')
     }
     return output;
 
+    function parseCode() {
+        const stackCommands = {
+            ' ': makePushNumberToStack,
+            '\t ': makeDuplicateNumberedStackItem,
+            '\t\n': makeDiscardBelowTopOfStack,
+            '\n ': makeDuplicateTopOfStack,
+            '\n\t': makeSwapTopStackElements,
+            '\n\n': makeDiscardTopOfStack
+        };
+        const arithmeticCommands = {
+            '  ': makeStackAddition,
+            ' \t': makeStackSubtraction,
+            ' \n': makeStackMultiplication,
+            '\t ': makeStackDivision,
+            '\t\t': makeStackRemainder
+        };
+        const heapAccessCommands = {
+            ' ': makeAddToHeap,
+            '\t': makeReadFromHeap
+        };
+        const ioCommands = {
+            '  ': makePopStackAndOutputAsChar,
+            ' \t': makePopStackAndOutputAsNumber,
+            '\t ': makeReadCharFromInput,
+            '\t\t': makeReadNumberFromInput
+        };
+        const flowControlCommands = {
+            '\n\n': makeExitProgram
+        }
+        const commandTypes = {
+            ' ': stackCommands,
+            '\t ': arithmeticCommands,
+            '\t\t': heapAccessCommands,
+            '\t\n': ioCommands,
+            '\n': flowControlCommands
+        };
+
+        const res = [];
+        while (parsePos < rawCode.length) {
+            const commandType = readCommandAndGetFromMap(commandTypes);
+            if (!commandType) {
+                throw new Error(`Invalid command at index ${parsePos - 2}`);
+            }
+            const command = readCommandAndGetFromMap(commandType);
+            if (!command) {
+                throw new Error(`Invalid command at index ${parsePos - 2}`);
+            }
+            res.push(command());
+        }
+        return res;
+    }
+
     function readChar() {
-        while (codePos < code.length) {
-            switch (code[codePos]) {
+        while (parsePos < rawCode.length) {
+            switch (rawCode[parsePos]) {
                 case ' ':
                 case '\t':
                 case '\n':
-                    return code[codePos++];
+                    return rawCode[parsePos++];
                 default:
-                    codePos++;
+                    parsePos++;
             }
         }
-        throw new Error('Unclean termination: programs should end with \'\\n\\n\\n\'');
+        throw new Error('Parse error: unexpected end of program');
     }
 
-    function readAndGetFromMap(map) {
+    function readCommandAndGetFromMap(map) {
         let name = readChar();
         if (map[name]) {
             return map[name];
@@ -117,181 +134,215 @@ function whitespace(code, input = '') {
 
     // *** Stack Manipulation ***
 
-    function readNumberToStack() {
+    function makePushNumberToStack() {
         const num = readCodeNumber();
-        stack.push(num);
+        return function pushNumberToStack() {
+            stack.push(num);
+        }
     }
 
-    function readNumberAndDuplicateStackItem() {
+    function makeDuplicateNumberedStackItem(codePos) {
         // 0-indexed
         const stackIndex = readCodeNumber();
-        if (stack.length <= stackIndex) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+        return function duplicateNumberedStackItem() {
+            if (stack.length <= stackIndex) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            stack.push(stack.at(-1 - stackIndex));
         }
-        stack.push(stack.at(-1 - stackIndex));
     }
 
-    function readNumberAndDiscardBelowTopOfStack() {
-        let num = readCodeNumber();
-        if (num < 0 || num >= stack.length) {
-            num = stack.length - 1;
+    function makeDiscardBelowTopOfStack() {
+        const codeNum = readCodeNumber();
+        return function discardBelowTopOfStack() {
+            const numToRemove = codeNum < 0 || codeNum >= stack.length ? stack.length - 1 : codeNum;
+            stack.splice(-1 - numToRemove, numToRemove);
         }
-        stack.splice(-1 - num, num);
     }
 
-    function duplicateTopOfStack() {
-        if (stack.length === 0) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeDuplicateTopOfStack(codePos) {
+        return function duplicateTopOfStack() {
+            if (stack.length === 0) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            stack.push(stack.at(-1));
         }
-        stack.push(stack.at(-1));
     }
 
-    function swapTopStackElements() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeSwapTopStackElements(codePos) {
+        return function swapTopStackElements() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const x = stack.pop();
+            const y = stack.pop();
+            stack.push(x, y);
         }
-        const x = stack.pop();
-        const y = stack.pop();
-        stack.push(x, y);
     }
 
-    function discardTopOfStack() {
-        if (stack.length < 1) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeDiscardTopOfStack(codePos) {
+        return function discardTopOfStack() {
+            if (stack.length < 1) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            stack.pop();
         }
-        stack.pop();
     }
 
     // *** Arithmetic ***
 
-    function stackAddition() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeStackAddition(codePos) {
+        return function stackAddition() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const a = stack.pop();
+            const b = stack.pop();
+            stack.push(b + a);
         }
-        const a = stack.pop();
-        const b = stack.pop();
-        stack.push(b + a);
     }
 
-    function stackSubtraction() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeStackSubtraction(codePos) {
+        return function stackSubtraction() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const a = stack.pop();
+            const b = stack.pop();
+            stack.push(b - a);
         }
-        const a = stack.pop();
-        const b = stack.pop();
-        stack.push(b - a);
     }
 
-    function stackMultiplication() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeStackMultiplication(codePos) {
+        return function stackMultiplication() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const a = stack.pop();
+            const b = stack.pop();
+            stack.push(b * a);
         }
-        const a = stack.pop();
-        const b = stack.pop();
-        stack.push(b * a);
     }
 
-    function stackDivision() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeStackDivision(codePos) {
+        return function stackDivision() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const a = stack.pop();
+            if (a === 0) {
+                throw new Error(`Division by 0: position ${codePos - 2}`);
+            }
+            const b = stack.pop();
+            stack.push(Math.floor(b / a));
         }
-        const a = stack.pop();
-        if (a === 0) {
-            throw new Error(`Division by 0: position ${codePos - 2}`);
-        }
-        const b = stack.pop();
-        stack.push(Math.floor(b / a));
     }
 
-    function stackRemainder() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makeStackRemainder(codePos) {
+        return function stackRemainder() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const a = stack.pop();
+            if (a === 0) {
+                throw new Error(`Division by 0: position ${codePos - 2}`);
+            }
+            const b = stack.pop();
+            stack.push(b - a * Math.floor(b / a));
         }
-        const a = stack.pop();
-        if (a === 0) {
-            throw new Error(`Division by 0: position ${codePos - 2}`);
-        }
-        const b = stack.pop();
-        stack.push(b - a * Math.floor(b / a));
     }
 
     // *** Heap Access ***
 
-    function addToHeap() {
-        if (stack.length < 2) {
-            throw new Error(`Not enough items on stack: position ${codePos - 3}`);
+    function makeAddToHeap(codePos) {
+        return function addToHeap() {
+            if (stack.length < 2) {
+                throw new Error(`Not enough items on stack: position ${codePos - 3}`);
+            }
+            const val = stack.pop();
+            const addr = stack.pop();
+            heap[addr] = val;
         }
-        const val = stack.pop();
-        const addr = stack.pop();
-        heap[addr] = val;
     }
 
-    function readFromHeap() {
-        if (stack.length < 1) {
-            throw new Error(`Not enough items on stack: position ${codePos - 3}`);
+    function makeReadFromHeap(codePos) {
+        return function readFromHeap() {
+            if (stack.length < 1) {
+                throw new Error(`Not enough items on stack: position ${codePos - 3}`);
+            }
+            const addr = stack.pop();
+            const val = heap[addr];
+            if (val === undefined) {
+                throw new Error(`Heap lookup failed: position ${codePos - 3}`);
+            }
+            stack.push(val);
         }
-        const addr = stack.pop();
-        const val = heap[addr];
-        if (val === undefined) {
-            throw new Error(`Heap lookup failed: position ${codePos - 3}`);
-        }
-        stack.push(val);
     }
 
     // *** I/O ***
 
-    function popStackAndOutputAsChar() {
-        const num = stack.pop();
-        if (num === undefined) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makePopStackAndOutputAsChar(codePos) {
+        return function popStackAndOutputAsChar() {
+            const num = stack.pop();
+            if (num === undefined) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            output += String.fromCharCode(num);
         }
-        output += String.fromCharCode(num);
     }
 
-    function popStackAndOutputAsNumber() {
-        const num = stack.pop();
-        if (num === undefined) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+    function makePopStackAndOutputAsNumber(codePos) {
+        return function popStackAndOutputAsNumber() {
+            const num = stack.pop();
+            if (num === undefined) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            output += num;
         }
-        output += num;
     }
 
-    function readCharFromInput() {
-        if (inputPos >= input.length) {
-            throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+    function makeReadCharFromInput(codePos) {
+        return function readCharFromInput() {
+            if (inputPos >= input.length) {
+                throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+            }
+            const char = input[inputPos++];
+            if (stack.length < 1) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const addr = stack.pop();
+            heap[addr] = char.charCodeAt(0);
         }
-        const char = input[inputPos++];
-        if (stack.length < 1) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
-        }
-        const addr = stack.pop();
-        heap[addr] = char.charCodeAt(0);
     }
 
-    function readNumberFromInput() {
-        const inputEnd = input.indexOf('\n', inputPos) + 1;
-        if (inputEnd === 0) {
-            throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+    function makeReadNumberFromInput(codePos) {
+        return function readNumberFromInput() {
+            const inputEnd = input.indexOf('\n', inputPos) + 1;
+            if (inputEnd === 0) {
+                throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+            }
+            const num = parseInt(input.slice(inputPos, inputEnd));
+            if (isNaN(num)) {
+                throw new Error(`Invalid number in input: ${input.slice(inputPos, inputEnd)}`);
+            }
+            inputPos = inputEnd;
+            if (stack.length < 1) {
+                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+            }
+            const addr = stack.pop();
+            heap[addr] = num;
         }
-        const num = parseInt(input.slice(inputPos, inputEnd));
-        if (isNaN(num)) {
-            throw new Error(`Invalid number in input: ${input.slice(inputPos, inputEnd)}`);
-        }
-        inputPos = inputEnd;
-        if (stack.length < 1) {
-            throw new Error(`Not enough items on stack: position ${codePos - 2}`);
-        }
-        const addr = stack.pop();
-        heap[addr] = num;
     }
 
     // *** Flow Control ***
 
-    function exitProgram() {
-        if (inputPos < input.length) {
-            throw new Error('Program ended with unread input');
+    function makeExitProgram() {
+        return function exitProgram() {
+            if (inputPos < input.length) {
+                throw new Error('Program ended with unread input');
+            }
+            return true;
         }
-        return true;
     }
 };
 
