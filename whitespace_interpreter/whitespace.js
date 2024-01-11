@@ -8,7 +8,7 @@ function unbleach (n) {
 }
 
 // solution
-function whitespace(code, input) {
+function whitespace(code, input = '') {
     const stackCommands = {
         ' ': readNumberToStack,
         '\t ': readNumberAndDuplicateStackItem,
@@ -288,6 +288,9 @@ function whitespace(code, input) {
     // *** Flow Control ***
 
     function exitProgram() {
+        if (inputPos < input.length) {
+            throw new Error('Program ended with unread input');
+        }
         return true;
     }
 };
