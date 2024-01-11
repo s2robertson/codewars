@@ -287,3 +287,21 @@ test('Arithmetic', () => {
     const mod4 = '  \t\t\t\t\n  \t\t\t\n\t \t\t\t\n \t\n\n\n';
     expect(whitespace(mod4)).toBe('-1');
 })
+
+test('Arithmetic errors', () => {
+    const divByZeroStr = 'Division by 0';
+
+    // '   \t\t\n' add number (3) to stack
+    // '   \n' add number (0) to stack
+    // '\t \t ' pop 0, 3, push 3 / 0 (error)
+    // '\n\n\n' exit program
+    const divErr = '   \t\t\n   \n\t \t \n\n\n';
+    expect(() => whitespace(divErr)).toThrow(divByZeroStr);
+
+    // '   \t\t\n' add number (3) to stack
+    // '   \n' add number (0) to stack
+    // '\t \t\t' pop 0, 3, push 3 % 0 (error)
+    // '\n\n\n' exit program
+    const modErr = '   \t\t\n   \n\t \t\t\n\n\n';
+    expect(() => whitespace(modErr)).toThrow(divByZeroStr);
+})

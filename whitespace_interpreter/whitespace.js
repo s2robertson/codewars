@@ -189,6 +189,9 @@ function whitespace(code, input) {
             throw new Error(`Not enough items on stack: position ${codePos - 2}`);
         }
         const a = stack.pop();
+        if (a === 0) {
+            throw new Error(`Division by 0: position ${codePos - 2}`);
+        }
         const b = stack.pop();
         stack.push(Math.floor(b / a));
     }
@@ -198,6 +201,9 @@ function whitespace(code, input) {
             throw new Error(`Not enough items on stack: position ${codePos - 2}`);
         }
         const a = stack.pop();
+        if (a === 0) {
+            throw new Error(`Division by 0: position ${codePos - 2}`);
+        }
         const b = stack.pop();
         stack.push(b - a * Math.floor(b / a));
     }
