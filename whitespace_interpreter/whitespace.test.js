@@ -586,4 +586,42 @@ describe('Labels and flow control', () => {
         const jumpIfNegStackEmptyErr = '\n\t\t \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
         expect(() => whitespace(jumpIfNegStackEmptyErr)).toThrow(stackEmptyStr);
     })
+
+    test('Jump to label at index 0', () => {
+        // '\n   \n' define label ' '
+        // '   \n' add number (0) to stack
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '   \n' add number (0) to stack
+        // '\t\t\t' pop address (a), push value at heap[a]
+        // '\n\t \t\n' pop number (a), jump to label 't' if a == 0
+        // '\n \n \n' jump to label ' '
+        // '\n  \t\n' define label 't'
+        // '\n\n\n' exit program
+        const jumpToBeginning = '\n   \n   \n\t\n\t\t   \n\t\t\t\n\t \t\n\n \n \n\n  \t\n\n\n\n';
+        expect(() => whitespace(jumpToBeginning, '1\n0\n')).not.toThrow();
+    })
+
+    test('Pop stack, jump to label at index 0 if 0', () => {
+        // '\n   \n' define label ' '
+        // '   \n' add number (0) to stack
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '   \n' add number (0) to stack
+        // '\t\t\t' pop address (a), push value at heap[a]
+        // '\n\t  \n' pop number (a), jump to label ' ' if a == 0
+        // '\n\n\n' exit program
+        const jumpToBeginningIfZero = '\n   \n   \n\t\n\t\t   \n\t\t\t\n\t  \n\n\n\n';
+        expect(() => whitespace(jumpToBeginningIfZero, '0\n1\n')).not.toThrow();
+    })
+
+    test('Pop stack, jump to label at index 0 if negative', () => {
+        // '\n   \n' define label ' '
+        // '   \n' add number (0) to stack
+        // '\t\n\t\t' read number (a) from input, pop address (b), store a at heap[b]
+        // '   \n' add number (0) to stack
+        // '\t\t\t' pop address (a), push value at heap[a]
+        // '\n\t\t \n' pop number (a), jump to label ' ' if a == 0
+        // '\n\n\n' exit program
+        const jumpToBeginningIfNegative = '\n   \n   \n\t\n\t\t   \n\t\t\t\n\t\t \n\n\n\n';
+        expect(() => whitespace(jumpToBeginningIfNegative, '-1\n1\n')).not.toThrow();
+    })
 })
