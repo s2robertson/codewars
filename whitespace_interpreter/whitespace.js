@@ -59,6 +59,7 @@ function whitespace(rawCode, input = '') {
         const flowControlCommands = {
             '  ': makeLabel,
             ' \n': makeJumpToLabel,
+            '\t ': makeJumpToLabelIfZero,
             '\n\n': makeExitProgram
         }
         const commandTypes = {
@@ -367,10 +368,27 @@ function whitespace(rawCode, input = '') {
     function makeJumpToLabel(codePos) {
         const label = readLabel();
         return function jumpToLabel() {
-            if (!labels[label]) {
+            if (labels[label] == undefined) {
                 throw new Error(`Invalid label (${unbleach(label)}) at position ${codePos - 3}`);
             }
             execPos = labels[label];
+        }
+    }
+
+    function makeJumpToLabelIfZero(codePos) {
+        const label = readLabel();
+        return function jumpToLabelIfZero() {
+            if (labels[label] == undefined) {
+                throw new Error(`Invalid label (${unbleach(label)}) at position ${codePos - 3}`)
+            }
+
+            if (stack.length < 1) {
+                throw new Error(`Not enough items on stack: position ${codePos}`);
+            }
+            const val = stack.pop();
+            if (val === 0) {
+                execPos = labels[label];
+            }
         }
     }
 
