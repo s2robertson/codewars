@@ -10,10 +10,12 @@ function unbleach (n) {
 // solution
 function whitespace(rawCode, input = '') {
     let parsePos = 0;
+    const labels = {};
     const executable = parseCode();
 
     let execPos = 0, inputPos = 0, finished = false;
-    let output = '', stack = [], heap = {};
+    let output = '';
+    const stack = [], heap = {};
     while (!finished && execPos < executable.length) {
         const cmd = executable[execPos];
         if (cmd()) {
@@ -55,6 +57,8 @@ function whitespace(rawCode, input = '') {
             '\t\t': makeReadNumberFromInput
         };
         const flowControlCommands = {
+            '  ': makeLabel,
+            ' \n': makeJumpToLabel,
             '\n\n': makeExitProgram
         }
         const commandTypes = {
@@ -75,7 +79,7 @@ function whitespace(rawCode, input = '') {
             if (!command) {
                 throw new Error(`Invalid command at index ${parsePos - 2}`);
             }
-            res.push(command(parsePos));
+            res.push(command(parsePos, res.length));
         }
         return res;
     }
@@ -130,6 +134,20 @@ function whitespace(rawCode, input = '') {
                 return sign * num;
             }
         }
+    }
+
+    function readLabel() {
+        let label = '';
+        while (true) {
+            const char = readChar();
+            if (char === ' ' || char === '\t') {
+                label += char;
+            } else {
+                // char === '\n'
+                break;
+            }
+        }
+        return label;
     }
 
     // *** Stack Manipulation ***
@@ -335,6 +353,26 @@ function whitespace(rawCode, input = '') {
     }
 
     // *** Flow Control ***
+
+    function makeLabel(rawCodePos, execPos) {
+        const label = readLabel();
+        if (labels[label] != undefined) {
+            throw new Error(`Duplicate label (${unbleach(label)}) at position ${rawCodePos - 3}`);
+        }
+
+        labels[label] = execPos;
+        return () => {}; // return a no-op for consistency with other commands
+    }
+
+    function makeJumpToLabel(codePos) {
+        const label = readLabel();
+        return function jumpToLabel() {
+            if (!labels[label]) {
+                throw new Error(`Invalid label (${unbleach(label)}) at position ${codePos - 3}`);
+            }
+            execPos = labels[label];
+        }
+    }
 
     function makeExitProgram() {
         return function exitProgram() {
