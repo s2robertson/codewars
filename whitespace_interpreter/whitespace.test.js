@@ -516,7 +516,7 @@ describe('Labels and flow control', () => {
         // '\t\n \t' pop stack, output as number
         // '\n\n\n' exit program
         const jumpIfZeroInvalidErr = '   \n\n\t  \n   \t\t\n\t\n \t\n\n\n\n  \t\n   \t  \n\t\n \t\n\n\n';
-        expect(() => whitespace(jumpIfZeroInvalidErr)).toThrow('Invalid label ( )');
+        expect(() => whitespace(jumpIfZeroInvalidErr)).toThrow('Invalid label (s)');
     })
 
     test('Jump to label if 0 should throw if stack empty', () => {
@@ -571,7 +571,7 @@ describe('Labels and flow control', () => {
         // '\t\n \t' pop stack, output as number
         // '\n\n\n' exit program
         const jumpIfNegInvalidErr = '  \t\t\n\n\t\t \n   \t\t\n\t\n \t\n\n\n\n  \t\n   \t  \n\t\n \t\n\n\n';
-        expect(() => whitespace(jumpIfNegInvalidErr)).toThrow('Invalid label ( )');
+        expect(() => whitespace(jumpIfNegInvalidErr)).toThrow('Invalid label (s)');
     })
 
     test('Jump to label if negative should throw if stack empty', () => {
