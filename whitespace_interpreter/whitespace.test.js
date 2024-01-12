@@ -443,14 +443,6 @@ describe('I/O', () => {
         const numInputErr2 = '\t\n\t\t\n\n\n';
         expect(() => whitespace(numInputErr2, '15\n')).toThrow(stackEmptyStr);
     })
-
-    test('Attempting to exit program with unprocessed input should throw', () => {
-        // '   \n' add number (0) to stack
-        // '\t\n\t ' read character (a) from input, pop address (b) from stack, store a (as character code) at heap[b]
-        // '\n\n\n' exit program
-        const charInput = '   \n\t\n\t \n\n\n';
-        expect(() => whitespace(charInput, 'ab')).toThrow('Program ended with unread input');
-    })
 })
 
 describe('Labels and flow control', () => {

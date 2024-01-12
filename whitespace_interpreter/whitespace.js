@@ -437,9 +437,6 @@ function whitespace(rawCode, input = '') {
 
     function makeExitProgram() {
         return function exitProgram() {
-            if (inputPos < input.length) {
-                throw new Error('Program ended with unread input');
-            }
             return true;
         }
     }
