@@ -443,3 +443,147 @@ describe('I/O', () => {
         expect(() => whitespace(charInput, 'ab')).toThrow('Program ended with unread input');
     })
 })
+
+describe('Labels and flow control', () => {
+    test('Jump to label', () => {
+        // '\n \n \n' jump to label ' '
+        // '   \t\n' add number (1) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t \n' add number (2) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpToLabel = '\n \n \n   \t\n\t\n \t\n\n\n\n   \n   \t \n\t\n \t\n\n\n';
+        expect(whitespace(jumpToLabel)).toBe('2');
+    })
+
+    test('Jump to invalid label should throw', () => {
+        // '\n \n \n' jump to label ' '
+        // '   \t\n' add number (1) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const labelJumpErr = '\n \n \n   \t\n\t\n \t\n\n\n';
+        expect(() => whitespace(labelJumpErr)).toThrow('Invalid label (s)');
+    })
+
+    test('Duplicate label should throw', () => {
+        // '\n   \n' define label ' '
+        // '\n   \n' define label ' '
+        // '   \t\n' add number (1) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const labelDupErr = '\n   \n\n   \n   \t\n\t\n \t\n\n\n';
+        expect(() => whitespace(labelDupErr)).toThrow('Duplicate label (s)');
+    })
+
+    test('Pop stack, jump to label if 0 (true)', () => {
+        // '   \n' add number (0) to stack
+        // '\n\t  \n' pop stack, if 0 (true), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfZeroTrue = '   \n\n\t  \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
+        expect(whitespace(jumpIfZeroTrue)).toBe('4');
+    })
+
+    test('Pop stack, jump to label if 0 (false)', () => {
+        // '   \t\n' add number (1) to stack
+        // '\n\t  \n' pop stack, if 0 (false), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfZeroFalse = '   \t\n\n\t  \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
+        expect(whitespace(jumpIfZeroFalse)).toBe('3');
+    })
+
+    test('Jump to label if 0 should throw if label invalid', () => {
+        // '   \n' add number (0) to stack
+        // '\n\t  \n' pop stack, if 0 (true), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n  \t\n' define label 't'
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfZeroInvalidErr = '   \n\n\t  \n   \t\t\n\t\n \t\n\n\n\n  \t\n   \t  \n\t\n \t\n\n\n';
+        expect(() => whitespace(jumpIfZeroInvalidErr)).toThrow('Invalid label ( )');
+    })
+
+    test('Jump to label if 0 should throw if stack empty', () => {
+        // '\n\t  \n' pop stack (empty), if 0, jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfZeroStackEmptyErr = '\n\t  \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
+        expect(() => whitespace(jumpIfZeroStackEmptyErr)).toThrow(stackEmptyStr);
+    })
+
+    test('Pop stack, jump to label if negative (true)', () => {
+        // '  \t\t\n' add number (-1) to stack
+        // '\n\t\t \n' pop stack, if negative (true), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfNegTrue = '  \t\t\n\n\t\t \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
+        expect(whitespace(jumpIfNegTrue)).toBe('4');
+    })
+
+    test('Pop stack, jump to label if negative (false)', () => {
+        // '   \n' add number (0) to stack
+        // '\n\t\t \n' pop stack, if negative (true), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfNegTrue = '   \n\n\t\t \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
+        expect(whitespace(jumpIfNegTrue)).toBe('3');
+    })
+
+    test('Jump to label if negative should throw if label invalid', () => {
+        // '  \t\t\n' add number (-1) to stack
+        // '\n\t\t \n' pop stack, if negative (true), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n  \t\n' define label 't'
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfNegInvalidErr = '  \t\t\n\n\t\t \n   \t\t\n\t\n \t\n\n\n\n  \t\n   \t  \n\t\n \t\n\n\n';
+        expect(() => whitespace(jumpIfNegInvalidErr)).toThrow('Invalid label ( )');
+    })
+
+    test('Jump to label if negative should throw if stack empty', () => {
+        // '\n\t\t \n' pop stack, if negative (true), jump to label ' '
+        // '   \t\t\n' add number (3) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t  \n' add number (4) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\n\n' exit program
+        const jumpIfNegStackEmptyErr = '\n\t\t \n   \t\t\n\t\n \t\n\n\n\n   \n   \t  \n\t\n \t\n\n\n';
+        expect(() => whitespace(jumpIfNegStackEmptyErr)).toThrow(stackEmptyStr);
+    })
+})
