@@ -15,7 +15,7 @@ function whitespace(rawCode, input = '') {
 
     let execPos = 0, inputPos = 0, finished = false;
     let output = '';
-    const stack = [], heap = {};
+    const stack = [], heap = {}, callStack = [];
     while (!finished && execPos < executable.length) {
         const cmd = executable[execPos];
         if (cmd()) {
@@ -58,9 +58,11 @@ function whitespace(rawCode, input = '') {
         };
         const flowControlCommands = {
             '  ': makeLabel,
+            ' \t': makeCallSubroutine,
             ' \n': makeJumpToLabel,
             '\t ': makeJumpToLabelIfZero,
             '\t\t': makeJumpToLabelIfNegative,
+            '\t\n': makeReturnFromSubroutine,
             '\n\n': makeExitProgram
         }
         const commandTypes = {
@@ -366,6 +368,17 @@ function whitespace(rawCode, input = '') {
         return () => {}; // return a no-op for consistency with other commands
     }
 
+    function makeCallSubroutine(codePos) {
+        const label = readLabel();
+        return function callSubroutine() {
+            if (labels[label] == undefined) {
+                throw new Error(`Invalid label (${unbleach(label)}) at position ${codePos - 3}`);
+            }
+            callStack.push(execPos);
+            execPos = labels[label];
+        }
+    }
+
     function makeJumpToLabel(codePos) {
         const label = readLabel();
         return function jumpToLabel() {
@@ -407,6 +420,15 @@ function whitespace(rawCode, input = '') {
             if (val < 0) {
                 execPos = labels[label];
             }
+        }
+    }
+
+    function makeReturnFromSubroutine(codePos) {
+        return function returnFromSubroutine() {
+            if (callStack.length < 1) {
+                throw new Error(`Attempting to return from subroutine, but call stack is empty (position ${codePos - 3})`);
+            }
+            execPos = callStack.pop();
         }
     }
 

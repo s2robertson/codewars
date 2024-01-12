@@ -624,4 +624,38 @@ describe('Labels and flow control', () => {
         const jumpToBeginningIfNegative = '\n   \n   \n\t\n\t\t   \n\t\t\t\n\t\t \n\n\n\n';
         expect(() => whitespace(jumpToBeginningIfNegative, '-1\n1\n')).not.toThrow();
     })
+
+    test('Call subroutine twice', () => {
+        // '\n \t \n' call subroutine ' '
+        // '\n \t \n' call subroutine ' '
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t\n' add number (1) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\t\n' return from subroutine
+        const callSubroutine = '\n \t \n\n \t \n\n\n\n\n   \n   \t\n\t\n \t\n\t\n';
+        expect(whitespace(callSubroutine)).toBe('11');
+    })
+
+    test('Calling subroutine should throw if label invalid', () => {
+        // '\n \t\t\n' call subroutine 't'
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t\n' add number (1) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\t\n' return from subroutine
+        const callSubroutineErr = '\n \t\t\n\n\n\n\n   \n   \t\n\t\n \t\n\t\n';
+        expect(() => whitespace(callSubroutineErr)).toThrow('Invalid label (t)');
+    })
+
+    test('Returning from subroutine should throw if call stack is empty', () => {
+        // '\n \n \n' jump to label ' '
+        // '\n\n\n' exit program
+        // '\n   \n' define label ' '
+        // '   \t\n' add number (1) to stack
+        // '\t\n \t' pop stack, output as number
+        // '\n\t\n' return from subroutine (error: jump was used instead of call)
+        const subroutineReturnErr = '\n \n \n\n\n\n\n   \n   \t\n\t\n \t\n\t\n';
+        expect(() => whitespace(subroutineReturnErr)).toThrow('Attempting to return from subroutine, but call stack is empty');
+    })
 })
