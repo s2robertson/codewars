@@ -337,15 +337,15 @@ function whitespace(rawCode, input = '') {
 
     function makeReadNumberFromInput(codePos) {
         return function readNumberFromInput() {
-            const inputEnd = input.indexOf('\n', inputPos) + 1;
-            if (inputEnd === 0) {
+            const inputEnd = input.indexOf('\n', inputPos);
+            if (inputEnd === -1) {
                 throw new Error(`Attempting to read past end of input: position ${codePos - 4}`);
             }
             const num = parseInt(input.slice(inputPos, inputEnd));
             if (isNaN(num)) {
                 throw new Error(`Invalid number in input: ${input.slice(inputPos, inputEnd)}`);
             }
-            inputPos = inputEnd;
+            inputPos = inputEnd + 1; // +1 to capture the terminating \n
             if (stack.length < 1) {
                 throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
