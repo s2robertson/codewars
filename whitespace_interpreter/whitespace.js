@@ -60,6 +60,7 @@ function whitespace(rawCode, input = '') {
             '  ': makeLabel,
             ' \n': makeJumpToLabel,
             '\t ': makeJumpToLabelIfZero,
+            '\t\t': makeJumpToLabelIfNegative,
             '\n\n': makeExitProgram
         }
         const commandTypes = {
@@ -387,6 +388,23 @@ function whitespace(rawCode, input = '') {
             }
             const val = stack.pop();
             if (val === 0) {
+                execPos = labels[label];
+            }
+        }
+    }
+
+    function makeJumpToLabelIfNegative(codePos) {
+        const label = readLabel();
+        return function jumpToLabelIfNegative() {
+            if (labels[label] == undefined) {
+                throw new Error(`Invalid label (${unbleach(label)}) at position ${codePos - 3}`)
+            }
+
+            if (stack.length < 1) {
+                throw new Error(`Not enough items on stack: position ${codePos}`);
+            }
+            const val = stack.pop();
+            if (val < 0) {
                 execPos = labels[label];
             }
         }
