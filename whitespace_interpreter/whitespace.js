@@ -166,6 +166,9 @@ function whitespace(rawCode, input = '') {
     function makeDuplicateNumberedStackItem(codePos) {
         // 0-indexed
         const stackIndex = readCodeNumber();
+        if (stackIndex < 0) {
+            throw new Error(`Cannot accept negative numbers: position ${codePos - 3}`);
+        }
         return function duplicateNumberedStackItem() {
             if (stack.length <= stackIndex) {
                 throw new Error(`Not enough items on stack: position ${codePos - 3}`);

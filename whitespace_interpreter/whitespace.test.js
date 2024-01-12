@@ -193,6 +193,15 @@ describe('Stack manipulation errors', () => {
         // '\n\n\n' exit program
         const duplicationErr2 = ' \n \n\n\n';
         expect(() => whitespace(duplicationErr2)).toThrow(stackEmptyStr);
+
+        // '   \t\n' push number (1)
+        // '   \t \n' push number (2)
+        // '   \t\t\n' push number (3)
+        // ' \t \t\t\n' read number (-1), and duplicate/push (-1)-th item from top of stack (error)
+        // '\t\n \t' pop value, output as number
+        // '\n\n\n'
+        const duplicationErr3 = '   \t\n   \t \n   \t\t\n \t \t\t\n\t\n \t\n\n\n';
+        expect(() => whitespace(duplicationErr3)).toThrow('Cannot accept negative numbers');
     })
 
     test('Attempting to swap non-existant stack items', () => {
