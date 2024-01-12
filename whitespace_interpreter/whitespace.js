@@ -75,7 +75,7 @@ function whitespace(rawCode, input = '') {
             if (!command) {
                 throw new Error(`Invalid command at index ${parsePos - 2}`);
             }
-            res.push(command());
+            res.push(command(parsePos));
         }
         return res;
     }
