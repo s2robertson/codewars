@@ -146,7 +146,7 @@ function whitespace(rawCode, input = '') {
         const stackIndex = readCodeNumber();
         return function duplicateNumberedStackItem() {
             if (stack.length <= stackIndex) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 3}`);
             }
             stack.push(stack.at(-1 - stackIndex));
         }
@@ -163,7 +163,7 @@ function whitespace(rawCode, input = '') {
     function makeDuplicateTopOfStack(codePos) {
         return function duplicateTopOfStack() {
             if (stack.length === 0) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 3}`);
             }
             stack.push(stack.at(-1));
         }
@@ -172,7 +172,7 @@ function whitespace(rawCode, input = '') {
     function makeSwapTopStackElements(codePos) {
         return function swapTopStackElements() {
             if (stack.length < 2) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 3}`);
             }
             const x = stack.pop();
             const y = stack.pop();
@@ -183,7 +183,7 @@ function whitespace(rawCode, input = '') {
     function makeDiscardTopOfStack(codePos) {
         return function discardTopOfStack() {
             if (stack.length < 1) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 3}`);
             }
             stack.pop();
         }
@@ -194,7 +194,7 @@ function whitespace(rawCode, input = '') {
     function makeStackAddition(codePos) {
         return function stackAddition() {
             if (stack.length < 2) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const a = stack.pop();
             const b = stack.pop();
@@ -205,7 +205,7 @@ function whitespace(rawCode, input = '') {
     function makeStackSubtraction(codePos) {
         return function stackSubtraction() {
             if (stack.length < 2) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const a = stack.pop();
             const b = stack.pop();
@@ -216,7 +216,7 @@ function whitespace(rawCode, input = '') {
     function makeStackMultiplication(codePos) {
         return function stackMultiplication() {
             if (stack.length < 2) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const a = stack.pop();
             const b = stack.pop();
@@ -227,11 +227,11 @@ function whitespace(rawCode, input = '') {
     function makeStackDivision(codePos) {
         return function stackDivision() {
             if (stack.length < 2) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const a = stack.pop();
             if (a === 0) {
-                throw new Error(`Division by 0: position ${codePos - 2}`);
+                throw new Error(`Division by 0: position ${codePos - 4}`);
             }
             const b = stack.pop();
             stack.push(Math.floor(b / a));
@@ -241,11 +241,11 @@ function whitespace(rawCode, input = '') {
     function makeStackRemainder(codePos) {
         return function stackRemainder() {
             if (stack.length < 2) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const a = stack.pop();
             if (a === 0) {
-                throw new Error(`Division by 0: position ${codePos - 2}`);
+                throw new Error(`Division by 0: position ${codePos - 4}`);
             }
             const b = stack.pop();
             stack.push(b - a * Math.floor(b / a));
@@ -285,7 +285,7 @@ function whitespace(rawCode, input = '') {
         return function popStackAndOutputAsChar() {
             const num = stack.pop();
             if (num === undefined) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             output += String.fromCharCode(num);
         }
@@ -295,7 +295,7 @@ function whitespace(rawCode, input = '') {
         return function popStackAndOutputAsNumber() {
             const num = stack.pop();
             if (num === undefined) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             output += num;
         }
@@ -304,11 +304,11 @@ function whitespace(rawCode, input = '') {
     function makeReadCharFromInput(codePos) {
         return function readCharFromInput() {
             if (inputPos >= input.length) {
-                throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+                throw new Error(`Attempting to read past end of input: position ${codePos - 4}`);
             }
             const char = input[inputPos++];
             if (stack.length < 1) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const addr = stack.pop();
             heap[addr] = char.charCodeAt(0);
@@ -319,7 +319,7 @@ function whitespace(rawCode, input = '') {
         return function readNumberFromInput() {
             const inputEnd = input.indexOf('\n', inputPos) + 1;
             if (inputEnd === 0) {
-                throw new Error(`Attempting to read past end of input: position ${codePos - 2}`);
+                throw new Error(`Attempting to read past end of input: position ${codePos - 4}`);
             }
             const num = parseInt(input.slice(inputPos, inputEnd));
             if (isNaN(num)) {
@@ -327,7 +327,7 @@ function whitespace(rawCode, input = '') {
             }
             inputPos = inputEnd;
             if (stack.length < 1) {
-                throw new Error(`Not enough items on stack: position ${codePos - 2}`);
+                throw new Error(`Not enough items on stack: position ${codePos - 4}`);
             }
             const addr = stack.pop();
             heap[addr] = num;
