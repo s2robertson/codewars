@@ -1,6 +1,6 @@
 // https://www.codewars.com/kata/52dc4688eca89d0f820004c6/javascript
 // 'Whitespace' is an esolang that uses only spaces, tabs, and new-lines
-// http://compsoc.dur.ac.uk/whitespace/tutorial.php
+// https://web.archive.org/web/20150618184706/http://compsoc.dur.ac.uk/whitespace/tutorial.php
 
 // to help with debugging
 function unbleach (n) {
